@@ -3,24 +3,25 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Do the same in json file
+%% Import one json file
 %modalities = {'LfpMontageTimeDomain', 'IndefiniteStreaming', 'BrainSenseLfp'};
-jsonname = 'Report_Json_Session_Report_20210701T153957.json';
+jsonname = 'Report_Json_Session_Report_20220318T124233.json';
 datajson = fileread(jsonname);
 data = jsondecode(datajson);
-
 
 %%
 myjsonfiles = dir('Report*.json');
 
 %myjson = 'Report_Json_Session_Report_20220328T145106.json';
-subID = 'Percept_Sub021';
+subID = 'Percept_Sub015';
 %time_point = 3; %1: postop, 2:3mfu, 3:12mfu
 
 prompt = 'Insert Time Point (1,2 or 3):';
 time_point = input(prompt);
 
+
 MetaTable = table;
+
 
 for jk = 1:numel(myjsonfiles)
     
@@ -34,11 +35,11 @@ MetaTable.TimePoint(jk,:) = time_point;
 MetaTable.BatPerc(jk,:) = data.BatteryInformation.BatteryPercentage;
 %MetaTable.BatEstDur(jk,:) = data.BatteryInformation.EstimatedBatteryLifeMonths;
 
-MetaTable.ImplantDate(jk,:) = data.DeviceInformation.Initial.ImplantDate;
+MetaTable.ImplantDate(jk,:) = data.DeviceInformation.Initial.ImplantDate; %'2020-06-03T15:22:14Z';
 MetaTable.AccumulatedTherapyOnTimeSinceImplant(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceImplant;
 MetaTable.AccumulatedTherapyOnTimeSinceFollowup(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceFollowup;
-MetaTable.FinalAccumulatedTherapyOnTimeSinceImplant(jk,:) = data.DeviceInformation.Final.AccumulatedTherapyOnTimeSinceImplant;
-MetaTable.FinalAccumulatedTherapyOnTimeSinceFollowup(jk,:) = data.DeviceInformation.Final.AccumulatedTherapyOnTimeSinceFollowup;
+MetaTable.FinalAccumulatedTherapyOnTimeSinceImplant(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceImplant;
+MetaTable.FinalAccumulatedTherapyOnTimeSinceFollowup(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceFollowup;
 
 MetaTable.SessionStartDate(jk,:) = {data.SessionDate};
 MetaTable.SessionEndDate(jk,:) = {data.SessionEndDate};
@@ -110,24 +111,37 @@ save(metatable_name, 'MetaTable')
 
 %% Concatenate tables
 
-tableA = load('Percept_Sub021_FollowUp_PostOp_MetaTable.mat');
-tableB = load('Percept_Sub021_FollowUp_3mfu_MetaTable.mat');
-tableC = load('Percept_Sub021_FollowUp_12mfu_MetaTable.mat');
+tableA = load('Percept_Sub015_FollowUp_PostOp_MetaTable.mat');
+tableB = load('Percept_Sub015_FollowUp_3mfu_MetaTable.mat');
+tableC = load('Percept_Sub015_FollowUp_12mfu_MetaTable.mat');
 
 
 tableab = outerjoin(tableA.MetaTable,tableB.MetaTable, 'MergeKeys',true);
-Percept021_MetaAll = outerjoin(tableab,tableC.MetaTable, 'MergeKeys',true);
+Percept015_MetaAll = outerjoin(tableab,tableC.MetaTable, 'MergeKeys',true);
 
-save('Percept021_MetaAll.mat','Percept021_MetaAll')
-
-%this is a trial comment
+save('Percept015_MetaAll.mat','Percept015_MetaAll')
 
 
+%% Concatenate Patients Tables
 
+% tableab = outerjoin(Percept017_MetaAll, Percept019_MetaAll,'MergeKeys',true)
+% table_all = outerjoin(tableab, Percept021_MetaAll, 'MergeKeys',true)
+% 
+% save('Table_all.mat','table_all')
 
+files = dir('Percept*.mat');
+N = length(files);
+T = cell(N,1);
 
+for i = 1:N
+    thisfile = files(i).name;
+    temp = struct2cell(load(thisfile));
+    T{i} = temp{1};
+end
 
+table_all = vertcat(T{:});
 
+save('Table_all.mat','table_all')
 
 
 

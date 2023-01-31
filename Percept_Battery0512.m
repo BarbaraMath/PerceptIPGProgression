@@ -5,7 +5,7 @@
 
 %% Import one json file
 %modalities = {'LfpMontageTimeDomain', 'IndefiniteStreaming', 'BrainSenseLfp'};
-jsonname = 'Report_Json_Session_Report_20220318T124233.json';
+jsonname = 'Report_Json_Session_Report_20200611T151925.json';
 datajson = fileread(jsonname);
 data = jsondecode(datajson);
 
@@ -13,33 +13,37 @@ data = jsondecode(datajson);
 myjsonfiles = dir('Report*.json');
 
 %myjson = 'Report_Json_Session_Report_20220328T145106.json';
-subID = 'Percept_Sub015';
-%time_point = 3; %1: postop, 2:3mfu, 3:12mfu
+subID = 'Percept_Sub005';
 
-prompt = 'Insert Time Point (1,2 or 3):';
+prompt = 'Insert Time Point (1,2,3,4):'; 
 time_point = input(prompt);
-
+%1 = postop, 2 = 3mfu, 3 = 12mfu, 4 = ambulant visit
 
 MetaTable = table;
 
-
 for jk = 1:numel(myjsonfiles)
-    
+
+%Load json file
 datajson = fileread(myjsonfiles(jk).name);
 data = jsondecode(datajson);
 
+%Add basic info to new table
 MetaTable.SubID(jk,:) = {subID};
 MetaTable.JsonName(jk,:) = myjsonfiles(jk).name;
 MetaTable.TimePoint(jk,:) = time_point;
 
 MetaTable.BatPerc(jk,:) = data.BatteryInformation.BatteryPercentage;
-%MetaTable.BatEstDur(jk,:) = data.BatteryInformation.EstimatedBatteryLifeMonths;
+if sum(strcmp(fieldnames(data.BatteryInformation), 'EstimatedBatteryLifeMonths')) == 1
+    MetaTable.BatEstDur(jk,:) = data.BatteryInformation.EstimatedBatteryLifeMonths;
+else
+    MetaTable.BatEstDur(jk,:) = NaN;
+end
 
-MetaTable.ImplantDate(jk,:) = data.DeviceInformation.Initial.ImplantDate; %'2020-06-03T15:22:14Z';
+MetaTable.ImplantDate(jk,:) = '2020-06-03T15:22:14Z';%data.DeviceInformation.Initial.ImplantDate; %'2020-06-03T15:22:14Z';
 MetaTable.AccumulatedTherapyOnTimeSinceImplant(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceImplant;
 MetaTable.AccumulatedTherapyOnTimeSinceFollowup(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceFollowup;
-MetaTable.FinalAccumulatedTherapyOnTimeSinceImplant(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceImplant;
-MetaTable.FinalAccumulatedTherapyOnTimeSinceFollowup(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceFollowup;
+MetaTable.FinalAccumulatedTherapyOnTimeSinceImplant(jk,:) = data.DeviceInformation.Final.AccumulatedTherapyOnTimeSinceImplant;
+MetaTable.FinalAccumulatedTherapyOnTimeSinceFollowup(jk,:) = data.DeviceInformation.Final.AccumulatedTherapyOnTimeSinceFollowup;
 
 MetaTable.SessionStartDate(jk,:) = {data.SessionDate};
 MetaTable.SessionEndDate(jk,:) = {data.SessionEndDate};
@@ -99,12 +103,32 @@ else
     MetaTable.BrainSenseLfpDur(jk,:) = NaN;
 end
 
+%Extract Chronic Data 
+if isfield(data,'DiagnosticData') == 1
+    if sum(strcmp(fieldnames(data.DiagnosticData),'LFPTrendLogs')) == 1
+        if sum(strcmp(fieldnames(data.DiagnosticData.LFPTrendLogs), 'HemisphereLocationDef_Left')) == 1
+            ls_chronic_mins = [];
+            for l = 1:length(fieldnames(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Left))
+                fnames = char(fieldnames(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Left));
+                fname = fnames(l,:);
+                n_logs = length(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Left.(fname));
+                ls_chronic_mins(l) = n_logs*10;
+            end
+        end
+    end
+else
+    ls_chronic_mins = 0;
+end
+
+MetaTable.Chronic_mins(jk,:) = sum(ls_chronic_mins);
+
 DurList = [MetaTable.LfpMontageTimeDomainDur(jk,:) MetaTable.IndefiniteStreamingDur(jk,:) MetaTable.BrainSenseLfpDur(jk,:)];
-    
 MetaTable.OverallSensingDuration(jk,:) = sum(DurList, 'omitnan');
     
 end
 
+%%
+MetaTable = sortrows(MetaTable,'SessionStartDate','ascend');
 %%
 metatable_name = [subID, '_FollowUp_12mfu_MetaTable.mat']
 save(metatable_name, 'MetaTable')

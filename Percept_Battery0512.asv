@@ -5,7 +5,7 @@
 
 %% Import one json file
 %modalities = {'LfpMontageTimeDomain', 'IndefiniteStreaming', 'BrainSenseLfp'};
-jsonname = 'Report_Json_Session_Report_20200611T151925.json';
+jsonname = 'Report_Json_Session_Report_20210614T132326.json';
 datajson = fileread(jsonname);
 data = jsondecode(datajson);
 
@@ -13,11 +13,11 @@ data = jsondecode(datajson);
 myjsonfiles = dir('Report*.json');
 
 %myjson = 'Report_Json_Session_Report_20220328T145106.json';
-subID = 'Percept_Sub005';
+subID = 'Percept_Sub024';
 
-prompt = 'Insert Time Point (1,2,3,4):'; 
+prompt = 'Insert Time Point (1,2,3,4,5):'; 
 time_point = input(prompt);
-%1 = postop, 2 = 3mfu, 3 = 12mfu, 4 = ambulant visit
+%1 = postop, 2 = 3mfu, 3 = 12mfu, 4 = beelitz, 5 = ambulant visit;
 
 MetaTable = table;
 
@@ -39,7 +39,7 @@ else
     MetaTable.BatEstDur(jk,:) = NaN;
 end
 
-MetaTable.ImplantDate(jk,:) = '2020-06-03T15:22:14Z';%data.DeviceInformation.Initial.ImplantDate; %'2020-06-03T15:22:14Z';
+MetaTable.ImplantDate(jk,:) = data.DeviceInformation.Initial.ImplantDate; %'2020-06-03T15:22:14Z';%'2020-06-03T15:22:14Z';%
 MetaTable.AccumulatedTherapyOnTimeSinceImplant(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceImplant;
 MetaTable.AccumulatedTherapyOnTimeSinceFollowup(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceFollowup;
 MetaTable.FinalAccumulatedTherapyOnTimeSinceImplant(jk,:) = data.DeviceInformation.Final.AccumulatedTherapyOnTimeSinceImplant;
@@ -103,7 +103,7 @@ else
     MetaTable.BrainSenseLfpDur(jk,:) = NaN;
 end
 
-%Extract Chronic Data 
+%Extract Chronic Data in minutes
 if isfield(data,'DiagnosticData') == 1
     if sum(strcmp(fieldnames(data.DiagnosticData),'LFPTrendLogs')) == 1
         if sum(strcmp(fieldnames(data.DiagnosticData.LFPTrendLogs), 'HemisphereLocationDef_Left')) == 1
@@ -115,12 +115,13 @@ if isfield(data,'DiagnosticData') == 1
                 ls_chronic_mins(l) = n_logs*10;
             end
         end
+        
     end
 else
     ls_chronic_mins = 0;
 end
 
-MetaTable.Chronic_mins(jk,:) = sum(ls_chronic_mins);
+MetaTable.Chronic_mins(jk,:) = sum(ls_chronic_mins); %in minutes
 
 DurList = [MetaTable.LfpMontageTimeDomainDur(jk,:) MetaTable.IndefiniteStreamingDur(jk,:) MetaTable.BrainSenseLfpDur(jk,:)];
 MetaTable.OverallSensingDuration(jk,:) = sum(DurList, 'omitnan');
@@ -128,9 +129,10 @@ MetaTable.OverallSensingDuration(jk,:) = sum(DurList, 'omitnan');
 end
 
 %%
+(sum(MetaTable.Chronic_mins)/60)/24
 MetaTable = sortrows(MetaTable,'SessionStartDate','ascend');
 %%
-metatable_name = [subID, '_FollowUp_12mfu_MetaTable.mat']
+metatable_name = [subID, '_FollowUp_Beelitz_MetaTable.mat']
 save(metatable_name, 'MetaTable')
 
 %% Concatenate tables
@@ -165,7 +167,36 @@ end
 
 table_all = vertcat(T{:});
 
-save('Table_all.mat','table_all')
+save('Table_all_Beelitz.mat','table_all')
+
+%% Calculate total duration of chronic sensing in Beelitz
+
+[val, ia, ib] = unique(table_all.SubID, 'stable');
+
+table_all.SubCode = ib;
+table_all = movevars(table_all, 'SubCode', 'Before', 'JsonName');
+
+chronic_beelitz = table;
+
+for jk = 1:length(unique(table_all.SubCode))
+    
+    chronic_beelitz.
+end
+
+
+
+sum(table_all.Chronic_mins(table_all.SubID == arr{1}))
+
+
+
+
+
+
+
+
+
+
+
 
 
 

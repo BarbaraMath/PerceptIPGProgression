@@ -115,29 +115,17 @@ saveas(gca,'RelativeStreaming.fig')
 saveas(gca,'RelativeStreaming.jpg')
 
 %% Plot Beelitz Total Chronic Sensing and Impact
-for i = 1:11
-    chronic_beelitz.ExtrStr(i,:) = extractAfter(chronic_beelitz.SubID(i,:), '_');
-end
 
 subplot(2,1,1)
-bar(chronic_beelitz.TotalChronicDurDays,'FaceColor',[0 0.4470 0.7410])
-xticklabels(chronic_beelitz.ExtrStr)
-xtickangle(20)
-set(gca,'TickLabelInterpreter','none')
-title('Total Chronic Sensing Duration PostOp & Beelitz')
-ylabel('Days')
-set(gca,'FontSize',15)
+bar(chronic_beelitz.TotalChronicDurDays)
+xlabel('Total Chronic Sensing Duration PostOp Beelitz [days]')
+ylabel('
 
-subplot(2,1,2)
-bar(chronic_beelitz.BatteryDrainage,'FaceColor', [0.6350 0.0780 0.1840])
-xticklabels(chronic_beelitz.ExtrStr)
-xtickangle(20)
-ylim([0 0.5])
-set(gca,'TickLabelInterpreter','none')
-title('Impact of Chronic Sensing Duration Postop & Beelitz on IPG Battery')
-ylabel('Battery Drainage [%]')
-set(gca,'FontSize',15)
 
-saveas(gca,'BeelitzChronic.fig')
-saveas(gca,'BeelitzChronic.jpg')
+
+
+
+
+
+
 

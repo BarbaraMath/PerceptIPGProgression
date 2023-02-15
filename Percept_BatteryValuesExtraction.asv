@@ -26,24 +26,19 @@ MetaTable = table;
 MetaTable = val_extract(myjsonfiles, subID, time_point, MetaTable)
 
 
-%% Fix Telemetry Duration
-MetaTable.t1 = extractBetween(MetaTable.SessionStartDate,'T','Z');
-MetaTable.t2 = extractBetween(MetaTable.SessionEndDate,'T','Z');
-for k = 1:size(MetaTable,1)
-    tel_dur = diff(datetime([MetaTable.t1(k);MetaTable.t2(k)]));
-    MetaTable.Tel_dur(k,:)= tel_dur;
-    
-    [Y, M, D, H, MN, S] = datevec(MetaTable.Tel_dur(k,:));
-    tel_durSec = H*3600+MN*60+S;
-    MetaTable.Tel_durSec(k,:) = tel_durSec;
-end
+%%
+metatat1 = extractBetween(MetaTable.SessionStartDate,'T','Z');
+t2 = extractBetween(MetaTable.SessionEndDate,'T','Z');
+tel_dur = diff(datetime([t1;t2]));
+[Y, M, D, H, MN, S] = datevec(tel_dur);
+tel_durSec = H*3600+MN*60+S;
 
-MetaTable = removevars(MetaTable, {'t1','t2'});
+MetaTable.Tel_dur(jk,:) = tel_dur;
+MetaTable.Tel_durSec(jk,:) = tel_durSec;
+%%
 
-%% Quick Chronic Sensing Check
+
 (sum(MetaTable.Chronic_mins)/60)/24
-
-%% Fix Order of rows
 MetaTable = sortrows(MetaTable,'SessionStartDate','ascend');
 %%
 metatable_name = [subID, '_FollowUp_Beelitz_MetaTable.mat']

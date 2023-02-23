@@ -17,7 +17,7 @@ function MetaTable = val_extract(myjsonfiles, subID, time_point, MetaTable)
         MetaTable.BatEstDur(jk,:) = NaN;
     end
 
-    MetaTable.ImplantDate(jk,:) = '2020-06-03T15:22:14Z' %data.DeviceInformation.Initial.ImplantDate; 
+    MetaTable.ImplantDate(jk,:) = data.DeviceInformation.Initial.ImplantDate; %'2021-06-30T06:50:33Z'; %
     MetaTable.AccumulatedTherapyOnTimeSinceImplant(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceImplant;
     MetaTable.AccumulatedTherapyOnTimeSinceFollowup(jk,:) = data.DeviceInformation.Initial.AccumulatedTherapyOnTimeSinceFollowup;
     MetaTable.FinalAccumulatedTherapyOnTimeSinceImplant(jk,:) = data.DeviceInformation.Final.AccumulatedTherapyOnTimeSinceImplant;
@@ -84,16 +84,17 @@ function MetaTable = val_extract(myjsonfiles, subID, time_point, MetaTable)
     %Extract Chronic Data in minutes
     if isfield(data,'DiagnosticData') == 1
         if sum(strcmp(fieldnames(data.DiagnosticData),'LFPTrendLogs')) == 1
-            if sum(strcmp(fieldnames(data.DiagnosticData.LFPTrendLogs), 'HemisphereLocationDef_Left')) == 1
+            if sum(strcmp(fieldnames(data.DiagnosticData.LFPTrendLogs), 'HemisphereLocationDef_Right')) == 1
                 ls_chronic_mins = [];
-                for l = 1:length(fieldnames(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Left))
-                    fnames = char(fieldnames(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Left));
+                for l = 1:length(fieldnames(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Right))
+                    fnames = char(fieldnames(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Right));
                     fname = fnames(l,:);
-                    n_logs = length(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Left.(fname));
+                    n_logs = length(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Right.(fname));
                     ls_chronic_mins(l) = n_logs*10;
                 end
             end
-
+        else
+            ls_chronic_mins = 0;
         end
     else
         ls_chronic_mins = 0;

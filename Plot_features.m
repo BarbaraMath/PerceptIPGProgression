@@ -6,28 +6,11 @@
 %% Figure with Battery Life at each time point
 %f = figure;
 %f.Position = [680 770 790 210];
-tbl_batterylife = table;
-
-for subidx = 1:length(unique(table_all.SubCode))
-    subplot(4,4,subidx)
-    this_table = table_all(table_all.SubCode == subidx,:);
-    
-    time1 = this_table(this_table.TimePoint == 1,:);
-    time2 = this_table(this_table.TimePoint == 2,:);
-    time3 = this_table(this_table.TimePoint == 3,:);
-    
-    bar([time1.BatPerc(end) time2.BatPerc(end) time3.BatPerc(end)])
-    set(gca,'XTickLabel',{'PostOp','3mfu','12mfu'});
-    ylabel('IPG Battery Left [%]');
-    t = title(this_table.SubID(1));
-    set(t,'Interpreter','none')
-    
-end
 
 sgtitle('Battery Percentage at Recording Time Points')
-
-saveas(gca, 'Battery_all.fig')
-saveas(gca, 'Battery_all.jpg')
+%%
+%saveas(gca, 'Battery_all.fig')
+%saveas(gca, 'Battery_all.jpg')
 
 %% Figure with total Recording Duration at each time point
 tbl_recdur = table;

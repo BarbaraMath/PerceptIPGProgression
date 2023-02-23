@@ -3,30 +3,27 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-addpath('T:\Dokumente\PROJECTS\BATTERY_LIFE\PerceptBatteryLife');
-%% Import one json file
-%modalities = {'LfpMontageTimeDomain', 'IndefiniteStreaming', 'BrainSenseLfp'};
-jsonname = 'Report_Json_Session_Report_20200610T093026.json';
-datajson = fileread(jsonname);
-data = jsondecode(datajson);
+codedir = 'T:\Dokumente\PROJECTS\BATTERY_LIFE\PerceptBatteryLife'; addpath(string(codedir));
+drive_dir =  'C:\Users\mathiopv\OneDrive - Charité - Universitätsmedizin Berlin\BATTERY_LIFE';
 
-%%
+%% Run Function that extract main features
 
 myjsonfiles = dir('Report*.json');
 
-%myjson = 'Report_Json_Session_Report_20220328T145106.json';
-subID = 'Percept_Sub005';
+prompt1 = 'Insert SubID name in format of e.g. 005:';
+subID = input(prompt1);
 
-prompt = 'Insert Time Point (1,2,3,4,5):'; 
-time_point = input(prompt);
+prompt2 = 'Insert Time Point (1,2,3,4,5):'; 
+time_point = input(prompt2);
 %1 = postop, 2 = 3mfu, 3 = 12mfu, 4 = beelitz, 5 = ambulant visit;
 
 MetaTable = table;
-
 MetaTable = val_extract(myjsonfiles, subID, time_point, MetaTable)
 
 
-%% Fix Telemetry Duration
+%% Table Fixes
+
+% Fix Telemetry Duration
 MetaTable.t1 = extractBetween(MetaTable.SessionStartDate,'T','Z');
 MetaTable.t2 = extractBetween(MetaTable.SessionEndDate,'T','Z');
 for k = 1:size(MetaTable,1)
@@ -40,14 +37,23 @@ end
 
 MetaTable = removevars(MetaTable, {'t1','t2'});
 
-%% Quick Chronic Sensing Check
-(sum(MetaTable.Chronic_mins)/60)/24
-
-%% Fix Order of rows
+% Fix Order of rows
 MetaTable = sortrows(MetaTable,'SessionStartDate','ascend');
-%%
-metatable_name = [subID, '_FollowUp_Beelitz_MetaTable.mat']
-save(metatable_name, 'MetaTable')
+
+%% Plot
+f = plot2check(MetaTable);
+
+%% Saving in all different Directories
+time_pointName = num2str(time_point);
+SubIDName = num2str(subID);
+out_folder = ['Sub',SubIDName];
+
+metatable_name = ['sub-',SubIDName,'_ses-EphysFU',time_pointName];
+t = sgtitle(metatable_name); set(t,'interpreter','none')
+
+save([drive_dir , '\results\' , out_folder , '\overview\' , metatable_name, '.mat'],'MetaTable')
+saveas(gca, [drive_dir , '\figures\' , out_folder , '\overview\' , metatable_name, '.fig'])
+saveas(gca, [drive_dir , '\figures\' , out_folder , '\overview\' , metatable_name, '.jpg'])
 
 %% Concatenate tables
 
@@ -61,27 +67,6 @@ Percept015_MetaAll = outerjoin(tableab,tableC.MetaTable, 'MergeKeys',true);
 
 save('Percept015_MetaAll.mat','Percept015_MetaAll')
 
-
-%% Concatenate Patients Tables
-
-% tableab = outerjoin(Percept017_MetaAll, Percept019_MetaAll,'MergeKeys',true)
-% table_all = outerjoin(tableab, Percept021_MetaAll, 'MergeKeys',true)
-% 
-% save('Table_all.mat','table_all')
-
-files = dir('Percept*.mat');
-N = length(files);
-T = cell(N,1);
-
-for i = 1:N
-    thisfile = files(i).name;
-    temp = struct2cell(load(thisfile));
-    T{i} = temp{1};
-end
-
-table_all = vertcat(T{:});
-
-save('Table_all_Beelitz.mat','table_all')
 
 %% Calculate total duration of chronic sensing in Beelitz
 

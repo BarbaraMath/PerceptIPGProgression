@@ -6,43 +6,101 @@
 %% Figure with Battery Life at each time point
 %f = figure;
 %f.Position = [680 770 790 210];
+T = readtable('Avg_Features.xlsx','Sheet','Sheet1');
+
+[val, ia, ib] = unique(T.SubID, 'stable');
+
+T.SubCode = ib;
+
+save('Avg_Features.mat','T')
+
+for k = 1:length(unique(T.SubCode))
+    subplot(4,4,k)
+    bar(T.Battery(T.SubCode == k));
+    xticklabels({'PostOp','3MFU','12MFU','Beelitz','Ambulant'});
+    t = title(string(unique(T.SubID(T.SubCode == k))));
+    xtickangle(30);
+    ylabel('Battery Percentage [%]');
+    set(gca,'FontSize',15)
+end
 
 sgtitle('Battery Percentage at Recording Time Points')
-%%
-%saveas(gca, 'Battery_all.fig')
-%saveas(gca, 'Battery_all.jpg')
+
+saveas(gca, 'Battery_all.fig')
+saveas(gca, 'Battery_all.jpg')
 
 %% Figure with total Recording Duration at each time point
-tbl_recdur = table;
 
-for subidx = 1:length(unique(table_all.SubCode))
-    subplot(4,4,subidx)
-    this_table = table_all(table_all.SubCode == subidx,:);
-    
-    time1 = this_table(this_table.TimePoint == 1,:);
-    time2 = this_table(this_table.TimePoint == 2,:);
-    time3 = this_table(this_table.TimePoint == 3,:);
-    
-    sensingdur_postop = sum(time1.OverallSensingDuration)/60^2;
-    sensingdur_3mfu = sum(time2.OverallSensingDuration)/60^2;
-    sensingdur_12mfu = sum(time3.OverallSensingDuration)/60^2;
-    
-    bar([sensingdur_postop, sensingdur_3mfu, sensingdur_12mfu])
-    set(gca,'XTickLabel',{'PostOp','3mfu','12mfu'});
-    ylabel('Sensing Duration [h]');
-    t = title(this_table.SubID(1));
-    set(t,'Interpreter','none')
-    
-    tbl_recdur{subidx,1} = subidx;
-    tbl_recdur{subidx,2} = sensingdur_postop;
-    tbl_recdur{subidx,3} = sensingdur_3mfu;
-    tbl_recdur{subidx,4} = sensingdur_12mfu;    
+for k = 1:length(unique(T.SubCode))
+    subplot(4,4,k)
+    bar(T.AllSensingDurSec(T.SubCode == k)/60);
+    xticklabels({'PostOp','3MFU','12MFU','Beelitz','Ambulant'});
+    t = title(string(unique(T.SubID(T.SubCode == k))));
+    xtickangle(30);
+    ylabel('Sensing Duration [min]');
+    set(gca,'FontSize',15)
 end
+
 
 sgtitle('Total Sensing Duration at each Time Point')
 
-saveas(gca, 'RecordingTime_all.fig')
-saveas(gca, 'RecordingTime_all.jpg')
+saveas(gca, 'SensingDur_all.fig')
+saveas(gca, 'SensingDur_all.jpg')
+
+%% Figure with total Telemetry Duration in all time points
+
+for k = 1:length(unique(T.SubCode))
+    subplot(4,4,k)
+    bar(T.AllTelSec(T.SubCode == k)/60/60);
+    xticklabels({'PostOp','3MFU','12MFU','Beelitz','Ambulant'});
+    t = title(string(unique(T.SubID(T.SubCode == k))));
+    xtickangle(30);
+    ylabel('Telemetry Duration [h]');
+    set(gca,'FontSize',15)
+end
+
+
+sgtitle('Total Telemetry Duration at each Time Point')
+
+saveas(gca, 'TelemetryDur_all.fig')
+saveas(gca, 'TelemetryDur_all.jpg')
+
+%% Figure with Telemetry and Sensing Duration for all subjects
+
+T.TelemOhneSens = T.AllTelSec-T.AllSensingDurSec;
+
+for k = 1:length(unique(T.SubCode))
+    subplot(4,4,k)
+    bar([T.TelemOhneSens(T.SubCode == k)/60/60, T.AllSensingDurSec(T.SubCode == k)/60/60],'stacked');
+    xticklabels({'PostOp','3MFU','12MFU','Beelitz','Ambulant'});
+    t = title(string(unique(T.SubID(T.SubCode == k))));
+    xtickangle(30);
+    ylabel('Telemetry Duration [h]');
+    set(gca,'FontSize',15)
+end
+
+legend({'Programming','Sensing'})
+
+sgtitle('Relative Telemetry/Sensing at each Time Point')
+
+saveas(gca, 'Telemetry_x_Sensing_all.fig')
+saveas(gca, 'Telemetry_x_Sensing_all.jpg')
+
+%% Figure with Chronic Duration at each time point
+for k = 1:length(unique(T.SubCode))
+    subplot(4,4,k)
+    bar(T.AllChronicMins(T.SubCode == k)/60/24);
+    xticklabels({'PostOp','3MFU','12MFU','Beelitz','Ambulant'});
+    t = title(string(unique(T.SubID(T.SubCode == k))));
+    xtickangle(30);
+    ylabel('Chronic Sensing [days]');
+    set(gca,'FontSize',15)
+end
+
+sgtitle('Total Chronic Sensing Duration at each Time Point')
+
+saveas(gca, 'ChronicDur_all.fig')
+saveas(gca, 'ChronicDur_all.jpg')
 
 %% Figure with Accumulated time on therapy x Battery life
 table_all.AccumTherapyDays = (table_all.AccumulatedTherapyOnTimeSinceImplant./60^2)/24; %in days

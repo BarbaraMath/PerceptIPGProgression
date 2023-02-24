@@ -30,13 +30,13 @@ end
 
 %% Get average features from allTP tables
 new_tbl = table;
-for jk = 5
+for jk = 2
     this_tbl = MetaTable_allTP(MetaTable_allTP.TimePoint == jk,:);  
     new_tbl.Battery = this_tbl.BatPerc(end);
     new_tbl.AllSensDurSec = sum(this_tbl.OverallSensingDurSec);
     new_tbl.AllTelDurSec = sum(this_tbl.Tel_durSec);
     new_tbl.AllChronDurMin = sum(this_tbl.Chronic_mins);
-    new_tbl.TimeSinceImplant = this_tbl.AccumulatedTherapyOnTimeSinceImplant(end);
+    new_tbl.TimeSinceImplant = this_tbl.AccumulatedTherapyOnTimeSinceImplant(end)
 end
 
 

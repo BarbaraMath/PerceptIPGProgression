@@ -70,9 +70,7 @@ save('Percept015_MetaAll.mat','Percept015_MetaAll')
 
 %% Calculate total duration of chronic sensing in Beelitz
 
-[val, ia, ib] = unique(table_all.SubID, 'stable');
-
-table_all.SubCode = ib;
+c
 table_all = movevars(table_all, 'SubCode', 'Before', 'JsonName');
 
 chronic_beelitz = table;

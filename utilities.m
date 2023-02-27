@@ -2,6 +2,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+
+[uniqueA i j] = unique(T.AllTelSec,'first');
+indexToDupes = find(not(ismember(1:numel(T.AllTelSec),i)))
 
 %% Concatenate Patients Tables
 drive_dir =  'C:\Users\mathiopv\OneDrive - Charité - Universitätsmedizin Berlin\BATTERY_LIFE';
@@ -30,7 +34,7 @@ end
 
 %% Get average features from allTP tables
 new_tbl = table;
-for jk = 2
+for jk = 5
     this_tbl = MetaTable_allTP(MetaTable_allTP.TimePoint == jk,:);  
     new_tbl.Battery = this_tbl.BatPerc(end);
     new_tbl.AllSensDurSec = sum(this_tbl.OverallSensingDurSec);

@@ -103,54 +103,41 @@ saveas(gca, 'ChronicDur_all.fig')
 saveas(gca, 'ChronicDur_all.jpg')
 
 %% Figure with Accumulated time on therapy x Battery life
-table_all.AccumTherapyDays = (table_all.AccumulatedTherapyOnTimeSinceImplant./60^2)/24; %in days
+T.TimesinceImplantDays = (T.TimesinceImplantSec./60^2)/24; %in days
+
 entries = [];
-for subid = 1:length(unique(table_all.SubCode))
+for subid = 1:length(unique(T.SubCode))
     %plot_name = ['h',num2str(subid)];
-    scatter(table_all.AccumTherapyDays(table_all.SubCode == subid), table_all.BatPerc(table_all.SubCode == subid), 100, 'filled'); 
+    scatter(T.TimesinceImplantDays(T.SubCode == subid), T.Battery(T.SubCode == subid), 100, 'filled'); 
     hold on;
     %subid) = extractAfter(unique(table_all.SubID(table_all.SubCode == subid)),'_');
 end
 xlabel('Time On Therapy since IPG Implantation (days)');
 ylabel('IPG Battery [%]')
-legend(entries, 'Interpreter','none');
+%legend(entries, 'Interpreter','none');
+set(gca,'FontSize',15)
 
 saveas(gca,'AccumTherapy.fig')
 saveas(gca,'AccumTherapy.jpg')
 
 
-%%
-for subidx = 1:length(unique(table_all.SubCode))
-    subplot(2,4,subidx)
-    this_table = table_all(table_all.SubCode == subidx,:);
-    
-    time1 = this_table(this_table.TimePoint == 1,:);
-    time2 = this_table(this_table.TimePoint == 2,:);
-    time3 = this_table(this_table.TimePoint == 3,:);
-    
-    values = [sum(time1.LfpMontageTimeDomainDur)/60^2 sum(time1.BrainSenseLfpDur)/60^2;...
-        sum(time2.LfpMontageTimeDomainDur)/60^2 sum(time2.BrainSenseLfpDur)/60^2;...
-        sum(time3.LfpMontageTimeDomainDur)/60^2 sum(time3.BrainSenseLfpDur)/60^2];
-    
-    bar(sum(time1.LfpMontageTimeDomainDur); ...
-        sum(time2.LfpMontageTimeDomainDur);...
-        sum(time1.LfpMontageTimeDomainDur))
-end
-
 %% Relative recording time i.e. (minutes of streaming / time on therapy) correlated with battery life
 
-dat = readtable('RelRecTime.csv')
+T.RelTimeSensingMin = (T.AllSensingDurSec./60) ./ (T.TimesinceImplantSec./60);
 
-for subid = 1:length(unique(dat.SubCode))
-    scatter(dat.RatioStreamingTherapy(dat.SubCode == subid), dat.BatPerc(dat.SubCode == subid),'filled')
+for subid = 1:length(unique(T.SubCode))
+    scatter(T.RelTimeSensingMin(T.SubCode == subid), T.Battery(T.SubCode == subid),100,'filled')
     hold on
 end
+set(gca, 'XScale', 'log')
+
+T.RelTimeSensingMinLog = log(T.RelTimeSensingMin)
+
 xlim([0 8])
-xlabel('Sensing [min] / Time since Implantation [days]')
+xlabel('Sensing [min] / Time since Implantation [min]')
 ylabel('Battery Percentage [%]')
 
-f = fit(dat.RatioStreamingTherapy, dat.BatPerc, 'poly1')
-
+set(gca,'FontSize',15)
 
 saveas(gca,'RelativeStreaming.fig')
 saveas(gca,'RelativeStreaming.jpg')

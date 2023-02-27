@@ -31,8 +31,8 @@ function [tbl_stim] = stim_settings(data)
 
     else
         for m = 1:(size(data.Groups.Initial.ProgramSettings(this_activegroup).SensingChannel(1).ElectrodeState,1)-1)
-            segment_name = data.Groups.Initial.ProgramSettings(this_activegroup).SensingChannel(1).ElectrodeState(m,1).Electrode;
-            segment_amp = data.Groups.Initial.ProgramSettings(this_activegroup).SensingChannel(1).ElectrodeState{m,1}.ElectrodeAmplitudeInMilliAmps;
+            segment_name = data.Groups.Initial.ProgramSettings(this_activegroup).SensingChannel{1}.ElectrodeState(m,1).Electrode;
+            segment_amp = data.Groups.Initial.ProgramSettings(this_activegroup).SensingChannel{1}.ElectrodeState{m,1}.ElectrodeAmplitudeInMilliAmps;
 
             freqL = data.Groups.Initial.ProgramSettings(this_activegroup).SensingChannel.RateInHertz;
             plswidthL = data.Groups.Initial.ProgramSettings(this_activegroup).SensingChannel.PulseWidthInMicroSecond;
@@ -42,7 +42,7 @@ function [tbl_stim] = stim_settings(data)
 
         end
     end
-
+%%
     %Impedances
     segments_tableL.Segment_Amp = cell2mat(segments_tableL.Segment_Amp);%convert amplitudes to normal numbers because whatever
     segments_tableL.Hemisphere = repmat('L',1, size(segments_tableL,1))';

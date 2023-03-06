@@ -61,10 +61,8 @@ xlabel('Telemetry [min]')
 
 xlabel('Chronic Sensing [min]')
 set(gca,'FontSize',10)
-sgtitle('Batter ¬ TEED-Telemetry-Chronic')
+sgtitle('Batter ¬ TEED-Telemetry-Chronic'
 
-saveas(gca,'BatteryInteractions.fig')
-saveas(gca,'BatteryInteractions.jpg')
 
 
 

@@ -15,7 +15,7 @@ subID = input(prompt1);
 
 prompt2 = 'Insert Time Point (1,2,3,4,5):'; 
 time_point = input(prompt2);
-%1 = postop, 2 = 3mfu, 3 = 12mfu, 4 = beelitz, 5 = ambulant visit;
+%0 = ward, 1 = postop, 2 = 3mfu, 3 = 12mfu, 4 = beelitz, 5 = ambulant visit;
 
 MetaTable = table;
 MetaTable = val_extract(myjsonfiles, subID, time_point, MetaTable)

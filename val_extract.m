@@ -9,6 +9,10 @@ function MetaTable = val_extract(myjsonfiles, subID, time_point, MetaTable)
     MetaTable.SubID(jk,:) = {subID};
     MetaTable.JsonName(jk,:) = myjsonfiles(jk).name;
     MetaTable.TimePoint(jk,:) = time_point;
+    
+    if time_point == 0
+        MetaTable.Wardcare(jk,:) = 1;
+
 
     MetaTable.BatPerc(jk,:) = data.BatteryInformation.BatteryPercentage;
     if sum(strcmp(fieldnames(data.BatteryInformation), 'EstimatedBatteryLifeMonths')) == 1

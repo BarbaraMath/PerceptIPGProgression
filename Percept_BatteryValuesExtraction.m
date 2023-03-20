@@ -67,10 +67,29 @@ Percept015_MetaAll = outerjoin(tableab,tableC.MetaTable, 'MergeKeys',true);
 
 save('Percept015_MetaAll.mat','Percept015_MetaAll')
 
+%% Concatenate one more table to the Overview (e.g. from the Ward FU0)
+
+MetaTable_allTP.Wardcare = repelem(0, size(MetaTable_allTP,1))';
+MetaTable_allTP = movevars(MetaTable_allTP, 'Wardcare', 'Before', 'BatPerc');
+
+MetaTable_allTP.SubID = string(MetaTable_allTP.SubID);
+MetaTable.SubID = string(MetaTable.SubID);
+MetaTable_allTP = outerjoin(MetaTable_allTP,MetaTable, 'MergeKeys',true);
+
+% Fix Order of rows
+MetaTable_allTP = sortrows(MetaTable_allTP,'AccumulatedTherapyOnTimeSinceImplant','ascend');
+
+save('sub-26_allTP_new.mat','MetaTable_allTP')
+
+%% Distinguish The tables from the MetaTable
+sub = 'Sub-30';
+tablePostOp = MetaTable_allTP(MetaTable_allTP.TimePoint == 1,:); save([sub,'_ses-EphysFU1.mat'],'tablePostOp')
+tableBeel =  MetaTable_allTP(MetaTable_allTP.TimePoint == 4,:); save([sub,'_ses-EphysFU4.mat'],'tableBeel')
+table3mfu =  MetaTable_allTP(MetaTable_allTP.TimePoint == 2,:); save([sub,'_ses-EphysFU2.mat'],'table3mfu')
+table12mfu =  MetaTable_allTP(MetaTable_allTP.TimePoint == 3,:); save([sub,'_ses-EphysFU3.mat'],'table12mfu')
 
 %% Calculate total duration of chronic sensing in Beelitz
 
-c
 table_all = movevars(table_all, 'SubCode', 'Before', 'JsonName');
 
 chronic_beelitz = table;

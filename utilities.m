@@ -4,8 +4,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 
-[uniqueA i j] = unique(T.AllTelSec,'first');
-indexToDupes = find(not(ismember(1:numel(T.AllTelSec),i)))
+[uniqueA i j] = unique(MetaTable_allTP.AccumulatedTherapyOnTimeSinceImplant,'first');
+indexToDupes = find(not(ismember(1:numel(MetaTable_allTP.AccumulatedTherapyOnTimeSinceImplant),i)))
 
 %% Concatenate Patients Tables
 drive_dir =  'C:\Users\mathiopv\OneDrive - Charité - Universitätsmedizin Berlin\BATTERY_LIFE';

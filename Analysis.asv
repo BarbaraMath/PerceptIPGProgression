@@ -46,9 +46,11 @@ xlabel('TEED [mJ/s]')
 lsline
 [rho,p] = corr(mat.TEED, mat.Battery, 'type','Spearman', 'rows','complete')
 title('Spearman rho = -0.84, p < 0.001')
+sigtitle('TEED x IPG Battery at 12mfu')
 set(gca,'FontSize',15)
 
 saveas(gca,'TEED_Batt.fig')
+saveas(gca,'TEED_Batt.pdf')
 saveas(gca,'TEED_Batt.jpg')
 
 
@@ -70,6 +72,18 @@ set(gca,'FontSize',15)
 saveas(gca,'TEED_Batt1.fig')
 saveas(gca,'TEED_Batt1.jpg')
 
+
+a = sort(round(mat.TelDur_scaled));
+
+bubsizes = unique(a)';
+legentry=cell(size(bubsizes));
+hold on
+for ind = 1:numel(bubsizes)
+   bubleg(ind) = plot(0,0,'ro','markersize',sqrt(bubsizes(ind)),'MarkerFaceColor','red');
+   set(bubleg(ind),'visible','off')
+   legentry{ind} = num2str(bubsizes(ind));
+end
+legend(legentry)
 %% LME battery ¬ teed * telemetry * chronic
 x = [mat.TEED mat.TelDurSecAll_u12mfu/60 mat.TelDurSecWard_u12mfu/60 mat.ChronicDays_u12mfu]
 [d,p,stats] = manova1(x,mat.Battery)
@@ -78,10 +92,9 @@ gplotmatrix(x, mat.Battery,mat.SenSight)
 
 ylabel('IPG Battery [%]')
 xlabel('TEED [mJ/s]')
-xlabel('Total Telemetry [min]')
-xlabel('Ward Telemetry [min]')
-xlabel('Chronic Sensing [min]')
+xlabel('Telemetry [min]')
 
+xlabel('Chronic Sensing [min]')
 set(gca,'FontSize',10)
 sgtitle('Batter ¬ TEED-Telemetry-Chronic')
 

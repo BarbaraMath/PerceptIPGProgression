@@ -50,14 +50,7 @@ for jk = 1:length(vec_tp)
 end
 
 %% Find first 12mfu session: Battery life, time after surgery, chronic sensing, overall sensing, teldursec
-
-tbl = table;
-tbl.ChronicMins_u12mfu = sum(MetaTable_allTP.Chronic_mins, 'omitnan');
-tbl.OverallSenDurSec_u12mfu = sum(MetaTable_allTP.OverallSensingDurSec, 'omitnan');
-tbl.TelDurSecAll_u12mfu = sum(MetaTable_allTP.Tel_durSec, 'omitnan');
-tbl.TelDurSecWard_u12mfu = sum(MetaTable_allTP.Tel_durSec(MetaTable_allTP.Wardcare == 1), 'omitnan')
-
-
+% load json file as well
 
 
 

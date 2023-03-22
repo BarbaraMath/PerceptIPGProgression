@@ -20,7 +20,7 @@ for k = 1:length(unique(T.SubCode))
     xticklabels({'PostOp','3MFU','12MFU','Beelitz','Ambulant'});
     t = title(string(unique(T.SubID(T.SubCode == k))));
     xtickangle(30);
-    ylabel('Battery Percentage [%]');
+    ylabel('Battery %');
     set(gca,'FontSize',15)
 end
 
@@ -37,7 +37,7 @@ for k = 1:length(unique(T.SubCode))
     xticklabels({'PostOp','3MFU','12MFU','Beelitz','Ambulant'});
     t = title(string(unique(T.SubID(T.SubCode == k))));
     xtickangle(30);
-    ylabel('Sensing Duration [min]');
+    ylabel('Sense Dur [min]');
     set(gca,'FontSize',15)
 end
 
@@ -71,11 +71,11 @@ T.TelemOhneSens = T.AllTelSec-T.AllSensingDurSec;
 
 for k = 1:length(unique(T.SubCode))
     subplot(4,4,k)
-    bar([T.TelemOhneSens(T.SubCode == k)/60/60, T.AllSensingDurSec(T.SubCode == k)/60/60],'stacked');
+    bar([T.TelemOhneSens(T.SubCode == k)/60^2, T.AllSensingDurSec(T.SubCode == k)/60/60],'stacked');
     xticklabels({'PostOp','3MFU','12MFU','Beelitz','Ambulant'});
     t = title(string(unique(T.SubID(T.SubCode == k))));
     xtickangle(30);
-    ylabel('Telemetry Duration [h]');
+    ylabel('Tel Dur[h]');
     set(gca,'FontSize',15)
 end
 
@@ -120,27 +120,6 @@ set(gca,'FontSize',15)
 saveas(gca,'AccumTherapy.fig')
 saveas(gca,'AccumTherapy.jpg')
 
-
-%% Relative recording time i.e. (minutes of streaming / time on therapy) correlated with battery life
-
-T.RelTimeSensingMin = (T.AllSensingDurSec./60) ./ (T.TimesinceImplantSec./60);
-
-for subid = 1:length(unique(T.SubCode))
-    scatter(T.RelTimeSensingMin(T.SubCode == subid), T.Battery(T.SubCode == subid),100,'filled')
-    hold on
-end
-set(gca, 'XScale', 'log')
-
-T.RelTimeSensingMinLog = log(T.RelTimeSensingMin)
-
-xlim([0 8])
-xlabel('Sensing [min] / Time since Implantation [min]')
-ylabel('Battery Percentage [%]')
-
-set(gca,'FontSize',15)
-
-saveas(gca,'RelativeStreaming.fig')
-saveas(gca,'RelativeStreaming.jpg')
 
 %% Plot Beelitz Total Chronic Sensing and Impact
 for i = 1:11

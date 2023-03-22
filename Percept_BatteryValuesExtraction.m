@@ -79,7 +79,23 @@ MetaTable_allTP = outerjoin(MetaTable_allTP,MetaTable, 'MergeKeys',true);
 % Fix Order of rows
 MetaTable_allTP = sortrows(MetaTable_allTP,'AccumulatedTherapyOnTimeSinceImplant','ascend');
 
-save('sub-26_allTP_new.mat','MetaTable_allTP')
+%STEP 1. FIXING: MAKE SURE TO FIX TIMEPOINT OF WARD TO MATCH THE OTHERS
+%STEP 2. FIXING: IF A SESSION HAS 0 SENSING TIME, IT IS CONSIDERED WARDCARE
+%EVEN IF IT'S FROM DIFFERENT TABLET
+
+
+MetaTable_allTP.WardCare1 = repelem(NaN, size(MetaTable_allTP,1))'
+
+for i = 1:size(MetaTable_allTP,1)
+    if MetaTable_allTP.OverallSensingDurSec(i) == 0 && MetaTable_allTP.Wardcare(i) == 0 && MetaTable_allTP.TimePoint(i) ~=4
+        MetaTable_allTP.WardCare1(i) = 1;
+    else
+        MetaTable_allTP.WardCare1(i) = MetaTable_allTP.Wardcare(i);
+    end
+end
+MetaTable_allTP = movevars(MetaTable_allTP, 'WardCare1', 'Before', 'BatPerc');
+
+save('sub-30_allTP_new.mat','MetaTable_allTP')
 
 %% Distinguish The tables from the MetaTable
 sub = 'Sub-30';
@@ -88,29 +104,6 @@ tableBeel =  MetaTable_allTP(MetaTable_allTP.TimePoint == 4,:); save([sub,'_ses-
 table3mfu =  MetaTable_allTP(MetaTable_allTP.TimePoint == 2,:); save([sub,'_ses-EphysFU2.mat'],'table3mfu')
 table12mfu =  MetaTable_allTP(MetaTable_allTP.TimePoint == 3,:); save([sub,'_ses-EphysFU3.mat'],'table12mfu')
 
-%% Calculate total duration of chronic sensing in Beelitz
-
-table_all = movevars(table_all, 'SubCode', 'Before', 'JsonName');
-
-chronic_beelitz = table;
-chronic_beelitz.SubID = char(unique(table_all.SubID));
-
-for jk = 1:length(unique(table_all.SubCode))
-    chronic_beelitz.SubCode{jk} = jk;
-    
-    chronic_beelitz.TotalChronicDurMins{jk} = sum(table_all.Chronic_mins(table_all.SubCode == jk));
-    
-end
-
-chronic_beelitz.TotalChronicDurMins = cell2mat(chronic_beelitz.TotalChronicDurMins)
-
-chronic_beelitz.TotalChronicDurHours = chronic_beelitz.TotalChronicDurMins./60;
-chronic_beelitz.TotalChronicDurDays = chronic_beelitz.TotalChronicDurHours./24;
-
-chronic_beelitz.BatteryDrainage = (chronic_beelitz.TotalChronicDurDays*3)./365 %(in percentage %)
-
-save('Table_all_Beelitz.mat','table_all')
-save('Chronic_Sensing_Beelitz.mat','chronic_beelitz')
 
 
 

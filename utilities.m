@@ -4,8 +4,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 
-[uniqueA i j] = unique(MetaTable_allTP.AccumulatedTherapyOnTimeSinceImplant,'first');
-indexToDupes = find(not(ismember(1:numel(MetaTable_allTP.AccumulatedTherapyOnTimeSinceImplant),i)))
+[uniqueA i j] = unique(MetaTable_allTP.Chronic_mins,'first');
+indexToDupes = find(not(ismember(1:numel(MetaTable_allTP.Chronic_mins),i)))
 
 %% Concatenate Patients Tables
 drive_dir =  'C:\Users\mathiopv\OneDrive - Charité - Universitätsmedizin Berlin\BATTERY_LIFE';
@@ -45,8 +45,12 @@ for jk = 1:length(vec_tp)
     new_tbl.Battery(jk,:) = this_tbl.BatPerc(end);
     new_tbl.AllSensDurSec(jk,:) = sum(this_tbl.OverallSensingDurSec,'omitnan');
     new_tbl.AllTelDurSec(jk,:) = sum(this_tbl.Tel_durSec,'omitnan');
+    
     new_tbl.AllChronDurMin(jk,:) = sum(this_tbl.Chronic_mins,'omitnan');
     new_tbl.TimeSinceImplant(jk,:) = this_tbl.AccumulatedTherapyOnTimeSinceImplant(end)
+    
+    new_tbl.AllTelDurSecWard(jk,:) = sum(this_tbl.Tel_durSec(this_tbl.Wardcare == 1),'omitnan');
+
 end
 
 %% Find first 12mfu session: Battery life, time after surgery, chronic sensing, overall sensing, teldursec

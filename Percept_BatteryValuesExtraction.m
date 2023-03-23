@@ -95,10 +95,10 @@ for i = 1:size(MetaTable_allTP,1)
 end
 MetaTable_allTP = movevars(MetaTable_allTP, 'WardCare1', 'Before', 'BatPerc');
 
-save('sub-30_allTP_new.mat','MetaTable_allTP')
+save('sub-26_allTP_new.mat','MetaTable_allTP')
 
 %% Distinguish The tables from the MetaTable
-sub = 'Sub-30';
+sub = 'Sub-26';
 tablePostOp = MetaTable_allTP(MetaTable_allTP.TimePoint == 1,:); save([sub,'_ses-EphysFU1.mat'],'tablePostOp')
 tableBeel =  MetaTable_allTP(MetaTable_allTP.TimePoint == 4,:); save([sub,'_ses-EphysFU4.mat'],'tableBeel')
 table3mfu =  MetaTable_allTP(MetaTable_allTP.TimePoint == 2,:); save([sub,'_ses-EphysFU2.mat'],'table3mfu')

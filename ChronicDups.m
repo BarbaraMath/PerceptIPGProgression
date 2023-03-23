@@ -27,7 +27,8 @@ for jk = 1:numel(myjsonfiles)
                 for l = 1:length(fieldnames(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Right))
                     fnames = char(fieldnames(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Right));
                     fname = fnames(l,:);
-                    %n_logs = length(data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Left.(fname));
+                    first_log = data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Left.(fname);
+                    last_log = data.DiagnosticData.LFPTrendLogs.HemisphereLocationDef_Left.(fname);
                     %ls_chronic_mins(l) = n_logs*10;
                 end
             end

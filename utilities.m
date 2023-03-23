@@ -49,7 +49,9 @@ for jk = 1:length(vec_tp)
     new_tbl.AllChronDurMin(jk,:) = sum(this_tbl.Chronic_mins,'omitnan');
     new_tbl.TimeSinceImplant(jk,:) = this_tbl.AccumulatedTherapyOnTimeSinceImplant(end)
     
-    new_tbl.AllTelDurSecWard(jk,:) = sum(this_tbl.Tel_durSec(this_tbl.Wardcare == 1),'omitnan');
+    new_tbl.AllTelDurSecWard(jk,:) = sum(this_tbl.Tel_durSec(this_tbl.WardCare1 == 1),'omitnan');
+
+    new_tbl.AllTelDurSecWard_initial(jk,:) = sum(this_tbl.Tel_durSec(this_tbl.Wardcare == 1),'omitnan');
 
 end
 
@@ -59,7 +61,7 @@ tbl = table;
 tbl.ChronicMins_u12mfu = sum(MetaTable_allTP.Chronic_mins, 'omitnan');
 tbl.OverallSenDurSec_u12mfu = sum(MetaTable_allTP.OverallSensingDurSec, 'omitnan');
 tbl.TelDurSecAll_u12mfu = sum(MetaTable_allTP.Tel_durSec, 'omitnan');
-tbl.TelDurSecWard_u12mfu = sum(MetaTable_allTP.Tel_durSec(MetaTable_allTP.Wardcare == 1), 'omitnan')
+tbl.TelDurSecWard_u12mfuinitial = sum(MetaTable_allTP.Tel_durSec(MetaTable_allTP.Wardcare == 1), 'omitnan')
 
 
 

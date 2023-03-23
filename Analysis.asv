@@ -92,13 +92,13 @@ saveas(gca,'BatteryInteractions.jpg')
 
 T = readtable('Avg_Features.xlsx','Sheet','Sheet1');
 
-telward3389 = [T.AllTelDurSecWard(T.TimePoint == 1 & T.SenSight == 0)/60 ...
-    T.AllTelDurSecWard(T.TimePoint == 2 & T.SenSight == 0)/60 ...
-    T.AllTelDurSecWard(T.TimePoint == 3 & T.SenSight == 0)/60]
+telward3389 = [T.AllTelDurSecWard_Initial(T.TimePoint == 1 & T.SenSight == 0)/60 ...
+    T.AllTelDurSecWard_Initial(T.TimePoint == 2 & T.SenSight == 0)/60 ...
+    T.AllTelDurSecWard_Initial(T.TimePoint == 3 & T.SenSight == 0)/60]
 
-telwardSens = [T.AllTelDurSecWard(T.TimePoint == 1 & T.SenSight == 1)/60 ...
-    T.AllTelDurSecWard(T.TimePoint == 2 & T.SenSight == 1)/60 ...
-    T.AllTelDurSecWard(T.TimePoint == 3 & T.SenSight == 1)/60]
+telwardSens = [T.AllTelDurSecWard_Initial(T.TimePoint == 1 & T.SenSight == 1)/60 ...
+    T.AllTelDurSecWard_Initial(T.TimePoint == 2 & T.SenSight == 1)/60 ...
+    T.AllTelDurSecWard_Initial(T.TimePoint == 3 & T.SenSight == 1)/60]
 
 subplot(1,2,1) 
 boxplot(telward3389); hold on
@@ -124,7 +124,5 @@ set(gca,'FontSize',15)
 
 [p, observeddifference, effectsize] = permutationTest(telward3389(:,2), telwardSens(:,2), 10000)
 
-
-saveas(gca,'WardTelemetryAllTP1.fig')
-saveas(gca,'WardTelemetryAllTP1.jpg')
+saveas(gca,'Wards
 

@@ -67,14 +67,14 @@ lsline
 sgtitle('TEED x IPG Battery at 12mfu')
 set(gca,'FontSize',15)
 
-saveas(gca,'TEED_Batt1.fig')
-saveas(gca,'TEED_Batt1.jpg')
+saveas(gca,'TEED_Batt_chron.fig')
+saveas(gca,'TEED_Batt_chron.jpg')
 
-%% LME battery ¬ teed * telemetry * chronic
-x = [mat.TEED mat.TelDurSecAll_u12mfu/60 mat.TelDurSecWard_u12mfu/60 mat.ChronicDays_u12mfu]
-[d,p,stats] = manova1(x,mat.Battery)
+%% MANOVA battery ¬ teed * telemetry * chronic
+x = [mat.TEED mat.TelDurSecAll_u12mfu/60 mat.TelDurSecWard_u12mfu_Initial/60 mat.ChronicDays_u12mfu]
+[d,p,stats] = manova1(x, mat.Battery)
 
-gplotmatrix(x, mat.Battery,mat.SenSight)
+gplotmatrix(x, mat.Battery, mat.SenSight, [], [], 30)
 
 ylabel('IPG Battery [%]')
 xlabel('TEED [mJ/s]')
@@ -88,17 +88,25 @@ sgtitle('Batter ¬ TEED-Telemetry-Chronic')
 saveas(gca,'BatteryInteractions.fig')
 saveas(gca,'BatteryInteractions.jpg')
 
+varnames = {'TEED';'TelDurAll';'TelDurWard';'Chronic'};
+bat = mat.Battery;
+teed = mat.TEED;
+tel = mat.TelDurSecAll_u12mfu/60;
+telward = mat.TelDurSecWard_u12mfu_Initial/60;
+chron = mat.ChronicDays_u12mfu;
+
+anovan(bat,{teed tel telward},3,3,varnames);
 %% Ward (initial) Telemetry at different timepoints
 
 T = readtable('Avg_Features.xlsx','Sheet','Sheet1');
 
-telward3389 = [T.AllTelDurSecWard_Initial(T.TimePoint == 1 & T.SenSight == 0)/60 ...
-    T.AllTelDurSecWard_Initial(T.TimePoint == 2 & T.SenSight == 0)/60 ...
-    T.AllTelDurSecWard_Initial(T.TimePoint == 3 & T.SenSight == 0)/60]
+telward3389 = [T.AllTelDurSecWard(T.TimePoint == 1 & T.SenSight == 0)/60 ...
+    T.AllTelDurSecWard(T.TimePoint == 2 & T.SenSight == 0)/60 ...
+    T.AllTelDurSecWard(T.TimePoint == 3 & T.SenSight == 0)/60]
 
-telwardSens = [T.AllTelDurSecWard_Initial(T.TimePoint == 1 & T.SenSight == 1)/60 ...
-    T.AllTelDurSecWard_Initial(T.TimePoint == 2 & T.SenSight == 1)/60 ...
-    T.AllTelDurSecWard_Initial(T.TimePoint == 3 & T.SenSight == 1)/60]
+telwardSens = [T.AllTelDurSecWard(T.TimePoint == 1 & T.SenSight == 1)/60 ...
+    T.AllTelDurSecWard(T.TimePoint == 2 & T.SenSight == 1)/60 ...
+    T.AllTelDurSecWard(T.TimePoint == 3 & T.SenSight == 1)/60]
 
 subplot(1,2,1) 
 boxplot(telward3389); hold on
@@ -124,5 +132,7 @@ set(gca,'FontSize',15)
 
 [p, observeddifference, effectsize] = permutationTest(telward3389(:,2), telwardSens(:,2), 10000)
 
-saveas(gca,'Wards
+
+saveas(gca,'WardTelemetryAllTP1.fig')
+saveas(gca,'WardTelemetryAllTP1.jpg')
 

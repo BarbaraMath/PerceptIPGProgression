@@ -67,26 +67,38 @@ lsline
 sgtitle('TEED x IPG Battery at 12mfu')
 set(gca,'FontSize',15)
 
-saveas(gca,'TEED_Batt1.fig')
-saveas(gca,'TEED_Batt1.jpg')
+saveas(gca,'TEED_Batt_chron.fig')
+saveas(gca,'TEED_Batt_chron.jpg')
 
-%% LME battery ¬ teed * telemetry * chronic
-x = [mat.TEED mat.TelDurSecAll_u12mfu/60 mat.TelDurSecWard_u12mfu/60 mat.ChronicDays_u12mfu]
-[d,p,stats] = manova1(x,mat.Battery)
+%% MANOVA battery ¬ teed * telemetry * chronic
+x = [mat.TEED mat.TelDurSecAll_u12mfu/60 mat.TelDurSecWard_u12mfu_Initial/60 mat.OverallSenDurSec_u12mfu/60 mat.ChronicDays_u12mfu]
+[d,p,stats] = manova1(x, mat.Battery)
 
-gplotmatrix(x, mat.Battery,mat.SenSight)
+gplotmatrix(x, mat.Battery, mat.SenSight, [], [], 30)
 
 ylabel('IPG Battery [%]')
 xlabel('TEED [mJ/s]')
 xlabel('Total Telemetry [min]')
 xlabel('Ward Telemetry [min]')
+xlabel('Sensing Duration [min]')
 xlabel('Chronic Sensing [min]')
 
 set(gca,'FontSize',10)
-sgtitle('Batter ¬ TEED-Telemetry-Chronic')
+
 
 saveas(gca,'BatteryInteractions.fig')
 saveas(gca,'BatteryInteractions.jpg')
+
+varnames = {'TEED';'TelDurAll';'TelDurWard';'Chronic'};
+bat = mat.Battery;
+teed = mat.TEED;
+tel_all = mat.TelDurSecAll_u12mfu/60;
+sens = mat.OverallSenDurSec_u12mfu/60;
+telward = mat.TelDurSecWard_u12mfu_Initial/60;
+chron = mat.ChronicMins_u12mfu
+
+anovan(bat, [teed telward sens chron], 'model','interaction','varnames', {'TEED';'TelDurAll';'Sens';'Chronic'}, 'continuous', [1 2 3 4]);
+
 
 %% Ward (initial) Telemetry at different timepoints
 

@@ -99,6 +99,11 @@ chron = mat.ChronicMins_u12mfu
 
 anovan(bat, [teed telward sens chron], 'model','interaction','varnames', {'TEED';'TelDurAll';'Sens';'Chronic'}, 'continuous', [1 2 3 4]);
 
+mat.TelDurMinAll_u12mfuMin = mat.TelDurSecAll_u12mfu
+mat.OverallSenDurMin_u12mfu = mat.OverallSenDurSec_u12mfu/60
+fitlm(mat, 'Battery~TEED * TelDurMinAll_u12mfuMin')
+fitlm(mat, 'Battery~OverallSenDurMin_u12mfu')
+
 
 %% Ward (initial) Telemetry at different timepoints
 

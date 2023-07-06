@@ -2,8 +2,13 @@ import os
 import glob
 import json
 from datetime import datetime 
+import numpy as np
+import math
 
-def extract_MetaTable(json_path, subID, WardCare, filtered_files):
+def extract_MetaTable(json_path_Subject, json_path, subID, filtered_files):
+
+    MetaTable_All = [] #pre-allocate meta_table for all
+
     for this_json_file in filtered_files:
         with open(this_json_file) as file:
             # Load the JSON data
@@ -76,20 +81,44 @@ def extract_MetaTable(json_path, subID, WardCare, filtered_files):
             BStr_n = 0
             dur_Bstr = 0
         
+        overallSensingDurSec = dur_lfpmon + dur_IS + dur_Bstr ##Overall Sensing Duration
+        
+        ##################################################################################
+        ##################################################################################
+        ##################################################################################
+        
         # Convert the strings to datetime objects
-        datetime1 = datetime.fromisoformat(SessionDate[:-1])
-        datetime2 = datetime.fromisoformat(SessionEndDate[:-1])
+        datetime1 = datetime.strptime(SessionDate, "%Y-%m-%dT%H:%M:%SZ")
+        
+        if 'SessionEndDate' in data and data['SessionEndDate']:
+            datetime2 = datetime.strptime(SessionEndDate, "%Y-%m-%dT%H:%M:%SZ")
+        else:
+            datetime2 = None
 
-        # Calculate the time difference in seconds
-        telemetry_durationSec = (datetime2 - datetime1).total_seconds()
+        if datetime1.strftime('%H:%M:%S') == '23:00:00':
+            if overallSensingDurSec == 0:
+                telemetry_durationSec = np.nan
+            else: 
+                telemetry_durationSec = overallSensingDurSec
+        elif datetime2 is None:
+                telemetry_durationSec = overallSensingDurSec
+        else:
+            telemetry_durationSec = (datetime2 - datetime1).total_seconds()        
 
-        ##Overall Sensing Duration
-        overallSensingDurSec = dur_lfpmon + dur_IS + dur_Bstr
+        if telemetry_durationSec < 0:
+            telemetry_durationSec = overallSensingDurSec
+        
+        if telemetry_durationSec == 0:
+            telemetry_durationSec = np.nan
 
-        MetaTable = {
+        ##################################################################################
+        ##################################################################################
+        ##################################################################################
+
+        this_json_MetaTable = {
         'SubID': subID,
         'json_fileName': json_fileName,
-        'WardCare': WardCare,
+        'Con_Reason': os.path.basename(json_path_Subject),
 
         'ImplantDate': ImplantDate,
         'SessionDate': SessionDate,
@@ -118,10 +147,13 @@ def extract_MetaTable(json_path, subID, WardCare, filtered_files):
         
         }
 
-        MetaTable_FineName = f'MetaTable_{json_fileName}'
+        MetaTable_All.append(this_json_MetaTable)
+        
 
-        with open(os.path.join(
-        json_path, MetaTable_FineName
-        ), 'w') as file:
-            json.dump(MetaTable, file)
+    MetaTable_All_FineName = f'{subID}_MetaTable_{os.path.basename(json_path)}.json'
+
+    with open(os.path.join(
+    os.path.dirname(json_path), MetaTable_All_FineName
+    ), 'w') as file:
+        json.dump(MetaTable_All, file)
     

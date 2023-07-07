@@ -4,6 +4,7 @@ import json
 from datetime import datetime 
 import numpy as np
 import math
+import re
 
 def extract_MetaTable(json_path_Subject, json_path, subID, filtered_files):
 
@@ -148,7 +149,7 @@ def extract_MetaTable(json_path_Subject, json_path, subID, filtered_files):
         }
 
         MetaTable_All.append(this_json_MetaTable)
-        
+        print(f'{json_fileName}: Done!')
 
     MetaTable_All_FineName = f'{subID}_MetaTable_{os.path.basename(json_path)}.json'
 
@@ -156,4 +157,53 @@ def extract_MetaTable(json_path_Subject, json_path, subID, filtered_files):
     os.path.dirname(json_path), MetaTable_All_FineName
     ), 'w') as file:
         json.dump(MetaTable_All, file)
-    
+
+
+def extract_StimPars():
+    electrode_neg = 0
+
+    stim_pars_dict = []
+
+    for hemi in range(len(data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'])):
+
+        for group in range(len(data['Groups']['Initial'])):
+            if data['Groups']['Initial'][group]['ActiveGroup'] == True:
+                activeGroupidx = group
+
+                ActGroup_Id = data['Groups']['Initial'][activeGroupidx]['GroupId'] #Active Group Name
+                this_Hemi = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['HemisphereLocation'] #Which Hemisphere?
+                this_Hemi_string = this_Hemi.split(".")[1]
+                this_contact_Id = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][electrode_neg]['Electrode'] #Which contact?
+                this_contact_N = re.findall(r'\d+', data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][electrode_neg]['Electrode'])[0]
+                this_amp = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][electrode_neg]['ElectrodeAmplitudeInMilliAmps'] #Amplitude
+                this_freq = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['RateInHertz'] #Frequency
+                this_pw = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['PulseWidthInMicroSecond'] #PulseWidth
+
+                print(f'Active Group in Hemi {this_Hemi_string} is: {ActGroup_Id}')
+                print(f'Contact {this_contact_N}: {this_amp}mA, {this_freq}Hz, {this_pw}mu')
+
+        impdsCurrent = data['Impedance'][0]['TestCurrentMA']
+        for contact in range(len(data['Impedance'][0]['Hemisphere'][hemi]['SessionImpedance']['Monopolar'])):
+            
+            impedance_contact = data['Impedance'][0]['Hemisphere'][hemi]['SessionImpedance']['Monopolar'][contact]['Electrode2']
+
+            if this_contact_Id == impedance_contact:
+                impedance = data['Impedance'][0]['Hemisphere'][hemi]['SessionImpedance']['Monopolar'][contact]['ResultValue']
+
+                print(f'Impedance of Contact {impedance_contact} is {impedance}\n')
+
+        this_stim_pars_dict = {
+        'Hemi': this_Hemi_string,
+        'Group_ID': ActGroup_Id,
+        'Contact': this_contact_N,
+        'Amplitude': this_amp,
+        'Frequency': this_freq,
+        'Pulsewidth': this_pw,
+        'ImpdsCurrent': impdsCurrent,
+        'ImpdsValue': impedance
+        
+        }
+
+        stim_pars_dict.append(this_stim_pars_dict)
+        
+        return stim_pars_dict

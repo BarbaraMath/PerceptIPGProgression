@@ -159,41 +159,104 @@ def extract_MetaTable(json_path_Subject, json_path, subID, filtered_files):
         json.dump(MetaTable_All, file)
 
 
-def extract_StimPars():
+def extract_StimPars(data, ElectrodeType):
     electrode_neg = 0
-
     stim_pars_dict = []
 
-    for hemi in range(len(data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'])):
+    for hemi in np.arange(2): #range(len(data['Groups']['Initial'][0]['ProgramSettings']['SensingChannel'])):
 
-        for group in range(len(data['Groups']['Initial'])):
+        for group in range(len(data['Groups']['Initial'])): #loop through the groups 
             if data['Groups']['Initial'][group]['ActiveGroup'] == True:
                 activeGroupidx = group
-
                 ActGroup_Id = data['Groups']['Initial'][activeGroupidx]['GroupId'] #Active Group Name
-                this_Hemi = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['HemisphereLocation'] #Which Hemisphere?
-                this_Hemi_string = this_Hemi.split(".")[1]
-                this_contact_Id = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][electrode_neg]['Electrode'] #Which contact?
-                this_contact_N = re.findall(r'\d+', data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][electrode_neg]['Electrode'])[0]
-                this_amp = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][electrode_neg]['ElectrodeAmplitudeInMilliAmps'] #Amplitude
-                this_freq = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['RateInHertz'] #Frequency
-                this_pw = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['PulseWidthInMicroSecond'] #PulseWidth
+                print(f'Active Group Idx is: {activeGroupidx}')
 
-                print(f'Active Group in Hemi {this_Hemi_string} is: {ActGroup_Id}')
-                print(f'Contact {this_contact_N}: {this_amp}mA, {this_freq}Hz, {this_pw}mu')
+#####################################################################################################################
+###############################################  3389  ##############################################################
+#####################################################################################################################
+                if ElectrodeType == '3389':
 
-        impdsCurrent = data['Impedance'][0]['TestCurrentMA']
-        for contact in range(len(data['Impedance'][0]['Hemisphere'][hemi]['SessionImpedance']['Monopolar'])):
-            
-            impedance_contact = data['Impedance'][0]['Hemisphere'][hemi]['SessionImpedance']['Monopolar'][contact]['Electrode2']
+                    if 'SensingChannel' in data['Groups']['Initial'][activeGroupidx]['ProgramSettings']:
+                        this_Hemi = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['HemisphereLocation'] #Which Hemisphere?
+                        this_contact_Id = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][electrode_neg]['Electrode'] #Which contact?
+                        this_contact_N = re.findall(r'\d+', data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][electrode_neg]['Electrode'])[0]
+                        this_amp = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][electrode_neg]['ElectrodeAmplitudeInMilliAmps'] #Amplitude
+                        this_freq = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['RateInHertz'] #Frequency
+                        this_pw = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['PulseWidthInMicroSecond'] #PulseWidth
 
-            if this_contact_Id == impedance_contact:
-                impedance = data['Impedance'][0]['Hemisphere'][hemi]['SessionImpedance']['Monopolar'][contact]['ResultValue']
+                    else:
+                        index = None
+                        this_Hemi = list(data['Groups']['Initial'][activeGroupidx]['ProgramSettings'].keys())[hemi+1]
+                        for i, dictionary in enumerate(data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['ElectrodeState']):
+                            if 'Negative' in dictionary['ElectrodeStateResult']:
+                                index = i
+                                break
+                        this_contact_Id = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['ElectrodeState'][index]['Electrode'] #Which contact?
+                        this_contact_N = this_contact_Id.split('.')[-1]
+                        this_amp = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['ElectrodeState'][index]['ElectrodeAmplitudeInMilliAmps']
+                        this_freq = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['RateInHertz']
+                        this_pw = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['PulseWidthInMicroSecond']
+                    print(f'Active Group in Hemi {this_Hemi} is: {ActGroup_Id}')
+                    print(f'Contact {this_contact_N}: {this_amp}mA, {this_freq}Hz, {this_pw}mu')
 
-                print(f'Impedance of Contact {impedance_contact} is {impedance}\n')
+#####################################################################################################################
+#############################################  SENSIGHT  ############################################################
+#####################################################################################################################
 
+                if ElectrodeType == 'SenSight':
+
+                    if 'SensingChannel' in data['Groups']['Initial'][activeGroupidx]['ProgramSettings']:
+                        this_Hemi = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['HemisphereLocation']
+                        this_contact_Id = []
+                        this_contact_N = []
+                        this_amp = []
+                        for i, dictionary in enumerate(data['Groups']['Initial'][0]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][:-1]):
+                            this_segment = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][i]['Electrode']
+                            this_seg = this_segment.split('_')[-1]
+                            this_mA = data['Groups']['Initial'][activeGroupidx]['ProgramSettings']['SensingChannel'][hemi]['ElectrodeState'][i]['ElectrodeAmplitudeInMilliAmps']
+
+                            this_contact_Id.append(this_segment)
+                            this_contact_N.append(this_seg)
+                            this_amp.append(this_mA)
+                        this_freq = data['Groups']['Initial'][0]['ProgramSettings']['SensingChannel'][hemi]['RateInHertz']
+                        this_pw = data['Groups']['Initial'][0]['ProgramSettings']['SensingChannel'][hemi]['PulseWidthInMicroSecond']
+
+                    else:
+                        this_Hemi = list(data['Groups']['Initial'][activeGroupidx]['ProgramSettings'].keys())[hemi+1]
+                        this_contact_Id = []
+                        this_contact_N = []
+                        this_amp = []
+
+                        for i, dictionary in enumerate(data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['ElectrodeState'][:-1]):
+                            this_segment = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['ElectrodeState'][i]['Electrode']
+                            this_seg = this_segment.split('_')[-1]
+                            this_mA = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['ElectrodeState'][i]['ElectrodeAmplitudeInMilliAmps']
+
+                            this_contact_Id.append(this_segment)
+                            this_contact_N.append(this_seg)
+                            this_amp.append(this_mA)
+    
+                        this_freq = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['RateInHertz']
+                        this_pw = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['PulseWidthInMicroSecond']
+
+#####################################################################################################################
+####################################### IMPEDANCE FOR ALL ###########################################################
+
+                impdsCurrent = data['Impedance'][0]['TestCurrentMA']
+                impedance = []
+                for contact in range(len(data['Impedance'][0]['Hemisphere'][hemi]['SessionImpedance']['Monopolar'])):
+                    
+                    impedance_contact = data['Impedance'][0]['Hemisphere'][hemi]['SessionImpedance']['Monopolar'][contact]['Electrode2']
+                    
+                    if impedance_contact in this_contact_Id:
+                        this_impd = data['Impedance'][0]['Hemisphere'][hemi]['SessionImpedance']['Monopolar'][contact]['ResultValue']
+                        impedance.append(this_impd)
+
+                        print(f'Impedance of Contact {impedance_contact} is {impedance}\n')
+
+### MAKE DICTIONARY WITH PARAMETERS
         this_stim_pars_dict = {
-        'Hemi': this_Hemi_string,
+        'Hemi': this_Hemi,
         'Group_ID': ActGroup_Id,
         'Contact': this_contact_N,
         'Amplitude': this_amp,
@@ -206,4 +269,5 @@ def extract_StimPars():
 
         stim_pars_dict.append(this_stim_pars_dict)
         
-        return stim_pars_dict
+    return stim_pars_dict
+

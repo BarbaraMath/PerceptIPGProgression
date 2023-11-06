@@ -271,3 +271,57 @@ def extract_StimPars(data, ElectrodeType):
         
     return stim_pars_dict
 
+
+def calculate_TEDD(stim_dat, ElectrodeType):
+    
+    freq_L = stim_dat[0]['Frequency']
+    pulsw_L = stim_dat[0]['Pulsewidth']
+    freq_R = stim_dat[1]['Frequency']
+    pulsw_R = stim_dat[1]['Pulsewidth']
+
+    if ElectrodeType == '3389':
+
+        #LEFT HEMISPHERE:
+        current_A_L = stim_dat[0]['Amplitude'] / 1000
+        impds_L = stim_dat[0]['ImpdsValue'][0]
+        voltage_L = current_A_L*impds_L
+
+        TEED_L = ((voltage_L**2)*freq_L*pulsw_L)/impds_L #in Joules per second
+
+        #RIGHT HEMISPHERE:
+        current_A_R = stim_dat[1]['Amplitude'] / 1000
+        impds_R = stim_dat[1]['ImpdsValue'][0]
+        voltage_R = current_A_R*impds_R
+
+        TEED_R = ((voltage_R**2)*freq_R*pulsw_R)/impds_R #in Joules per second
+
+    if ElectrodeType == 'SenSight':
+        # LEFT HEMISPHERE:
+        current_A_L = [x/1000 for x in stim_dat[0]['Amplitude']]
+        impds_L = stim_dat[0]['ImpdsValue']
+        voltage_L = [a * b for a, b in zip(current_A_L, impds_L)]
+
+        all_TEEDs_L = []
+
+        for seg in range(len(voltage_L)):
+            TEED_seg_L = ((voltage_L[seg]**2) * freq_L * pulsw_L) / impds_L[seg]
+
+            all_TEEDs_L.append(TEED_seg_L)
+        TEED_L = sum(all_TEEDs_L)
+
+        # RIGHT HEMISPHERE:
+        current_A_R = [x/1000 for x in stim_dat[1]['Amplitude']]
+        impds_R = stim_dat[1]['ImpdsValue']
+        voltage_R = [a * b for a, b in zip(current_A_R, impds_R)]
+
+        all_TEEDs_R = []
+
+        for seg in range(len(voltage_R)):
+            TEED_seg_R = ((voltage_R[seg]**2) * freq_R * pulsw_R) / impds_R[seg]
+
+            all_TEEDs_R.append(TEED_seg_R)
+        TEED_R = sum(all_TEEDs_R)
+
+    
+    return voltage_L, TEED_L, voltage_R, TEED_R
+

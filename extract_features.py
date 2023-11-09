@@ -6,6 +6,13 @@ import numpy as np
 import math
 import re
 
+'''
+This contains the following functions:
+1. ectract_MetaTable
+2. extract_StimPars
+3. calculate_TEDD
+'''
+
 def extract_MetaTable(json_path_Subject, json_path, subID, filtered_files):
 
     MetaTable_All = [] #pre-allocate meta_table for all

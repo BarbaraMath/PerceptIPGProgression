@@ -203,7 +203,7 @@ def get_battery_corrs(directory_Feat, directory_TEED, directory_corrs, saving):
         line = np.polyval(coeffs, x)
 
         # Plot least squares line
-        axs[i].plot(x, line, color='red', label=f'Fit: R={stat_res[0]:.2f}, p={stat_res[1]:.3f}')
+        axs[i].plot(x, line, color='red', label=f'Fit: R={stat_res[0]:.2f}, p={stat_res[1]:.5f}')
 
         axs[i].set_title(f'Correlation with {col}')
         axs[i].set_xlabel(col)

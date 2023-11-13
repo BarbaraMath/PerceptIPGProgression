@@ -242,6 +242,8 @@ def extract_StimPars(data, ElectrodeType):
                             this_contact_Id.append(this_segment)
                             this_contact_N.append(this_seg)
                             this_amp.append(this_mA)
+
+
     
                         this_freq = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['RateInHertz']
                         this_pw = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['PulseWidthInMicroSecond']

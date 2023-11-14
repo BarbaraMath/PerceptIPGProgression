@@ -5,12 +5,14 @@ from datetime import datetime
 import numpy as np
 import math
 import re
+import pickle
 
 '''
 This contains the following functions:
 1. ectract_MetaTable
 2. extract_StimPars
 3. calculate_TEDD
+4. extract_chronic_nonDups
 '''
 
 def extract_MetaTable(json_path_Subject, json_path, subID, filtered_files):
@@ -233,7 +235,7 @@ def extract_StimPars(data, ElectrodeType):
                         this_contact_Id = []
                         this_contact_N = []
                         this_amp = []
-
+            
                         for i, dictionary in enumerate(data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['ElectrodeState'][:-1]):
                             this_segment = data['Groups']['Initial'][activeGroupidx]['ProgramSettings'][this_Hemi]['Programs'][0]['ElectrodeState'][i]['Electrode']
                             this_seg = this_segment.split('_')[-1]
@@ -334,3 +336,39 @@ def calculate_TEDD(stim_dat, ElectrodeType):
     
     return voltage_L, TEED_L, voltage_R, TEED_R
 
+def extract_chronic_nonDups(SubID, directory_of_all):
+    all_chronics = []
+
+    for item in os.listdir(directory_of_all): #find all files in each patient directory in S drive
+        item_path = os.path.join(directory_of_all, item) #define the directory e.g. the folder 'Beelitz'
+        
+        if os.path.isdir(item_path): #if this is a folder
+            all_json_files = glob.glob(os.path.join(item_path, '*.json')) #find all json files within the folder
+            
+            for file in all_json_files: #loop through each json file
+                with open(file) as file: #and load it
+                    data = json.load(file)
+                #check if there is chronic data in it    
+                if 'DiagnosticData' in data and 'LFPTrendLogs' in data['DiagnosticData'] and 'HemisphereLocationDef.Right' in data['DiagnosticData']['LFPTrendLogs']:
+                    for key, value in data['DiagnosticData']['LFPTrendLogs']['HemisphereLocationDef.Right'].items():
+                        # key is date
+                        chronic_dict = data['DiagnosticData']['LFPTrendLogs']['HemisphereLocationDef.Right'][key]
+                        for i in range(len(chronic_dict)):
+                            chronic_date = chronic_dict[i]['DateTime']
+                            all_chronics.append(chronic_date)
+                            
+    non_dups_chronics = np.sort(np.unique(all_chronics))
+
+    diff = len(all_chronics) - len(non_dups_chronics)
+    perc_diff = (diff/len(all_chronics)) * 100
+
+    print(f'Total N of chronic entries: {len(all_chronics)}')
+    print(f'From those {diff} were duplicates, i.e. {np.around(perc_diff, decimals = 2)}%')
+    print(f'Total N of correct entries: {len(non_dups_chronics)}')
+
+    fName = f'{SubID}_NonDupsChronics.pkl'
+    dups_dir = 'S:\\AG\\AG-Bewegungsstoerungen-II\\LFP\\PROJECTS\\BATTERY\\NonDups'
+    with open(os.path.join(dups_dir, fName), 'wb') as file:
+        pickle.dump(non_dups_chronics, file)
+        
+    return non_dups_chronics

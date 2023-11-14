@@ -169,7 +169,7 @@ def get_battery_corrs(directory_Feat, directory_TEED, directory_corrs, saving):
 
             all_teeds_dfs = pd.concat([all_teeds_dfs, this_teed])
 
-# 3. Combine these two and convert to minutes
+# 3. Combine these two and convert to minutes + merge with Chronic dataframe
 
     corr_df = all_sums_dfs.merge(all_teeds_dfs, on = 'SubID')
     columns_to_divide = ['Telemetry_AllSec', 'TelemDurSumSecRes', 
@@ -178,11 +178,13 @@ def get_battery_corrs(directory_Feat, directory_TEED, directory_corrs, saving):
     for column in columns_to_divide:
         corr_df[f'{column}_div'] = corr_df[column] / 60
 
-
+    chronic_nonDups = pd.read_csv(os.path.join(directory_corrs, 'Chronic_nonDups_vals.csv'))
+    corr_df = pd.merge(corr_df, chronic_nonDups, on='SubID', how='outer')
 # 4. Make plots
     cols_to_corr = ['Telemetry_AllSec_div', 'TelemDurSumSecRes_div',
         'TelemDurSumSecWard_div', 'SensDurSumSec_div',
-        'TEED']
+        'TEED', 'Chronic_12mfu_Days']
+    
     fig, axs = plt.subplots(2, 3, figsize=(15, 10))  # Adjusted the figure size
 
     correlation_stats = {}
@@ -198,12 +200,13 @@ def get_battery_corrs(directory_Feat, directory_TEED, directory_corrs, saving):
         stat_res = stats.spearmanr(x,y)
         correlation_stats[col] = {'R': stat_res.correlation, 'p-value': stat_res.pvalue}
 
-        # Fit a polynomial of degree 1 (linear fit)
-        coeffs = np.polyfit(x, y, 1)
-        line = np.polyval(coeffs, x)
+        if col != 'Chronic_12mfu_Days':
+            # Fit a polynomial of degree 1 (linear fit)
+            coeffs = np.polyfit(x, y, 1)
+            line = np.polyval(coeffs, x)
 
-        # Plot least squares line
-        axs[i].plot(x, line, color='red', label=f'Fit: R={stat_res[0]:.2f}, p={stat_res[1]:.5f}')
+            # Plot least squares line
+            axs[i].plot(x, line, color='red', label=f'Fit: R={stat_res[0]:.2f}, p={stat_res[1]:.5f}')
 
         axs[i].set_title(f'Correlation with {col}')
         axs[i].set_xlabel(col)

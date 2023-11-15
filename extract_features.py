@@ -360,14 +360,16 @@ def extract_chronic_nonDups(SubID, directory_of_all):
     non_dups_chronics = np.sort(np.unique(all_chronics))
 
     diff = len(all_chronics) - len(non_dups_chronics)
-    perc_diff = (diff/len(all_chronics)) * 100
-
     print(f'Total N of chronic entries: {len(all_chronics)}')
-    print(f'From those {diff} were duplicates, i.e. {np.around(perc_diff, decimals = 2)}%')
+    
+    if len(all_chronics) != 0:
+        perc_diff = (diff/len(all_chronics)) * 100
+        print(f'From those {diff} were duplicates, i.e. {np.around(perc_diff, decimals = 2)}%')
+    
     print(f'Total N of correct entries: {len(non_dups_chronics)}')
 
     fName = f'{SubID}_NonDupsChronics.pkl'
-    dups_dir = 'S:\\AG\\AG-Bewegungsstoerungen-II\\LFP\\PROJECTS\\BATTERY\\NonDups'
+    dups_dir = 'S:\\AG\\AG-Bewegungsstoerungen-II\\LFP\\PROJECTS\\BATTERY\\Chronic_Sensing_NonDups'
     with open(os.path.join(dups_dir, fName), 'wb') as file:
         pickle.dump(non_dups_chronics, file)
         

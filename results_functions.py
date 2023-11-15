@@ -17,7 +17,7 @@ This contains the following functions:
 
 '''
 
-def get_descriptives(directory, saving):
+def get_descriptives(directory, dir_saving, saving):
 
 #1. GET DATAFRAMES FOR ALL
     df_fu0m = pd.DataFrame()
@@ -80,13 +80,13 @@ def get_descriptives(directory, saving):
 
         if saving == 1:
             with open(os.path.join(
-                    directory,
+                    dir_saving,
                     f'Means_{names[k]}.pkl'
                 ), "wb") as file:
                     pickle.dump(means_dict, file)
                     
             with open(os.path.join(
-                    directory,
+                    dir_saving,
                     f'STDs_{names[k]}.pkl'
                 ), "wb") as file:
                     pickle.dump(stds_dict, file)
@@ -124,12 +124,12 @@ def get_descriptives(directory, saving):
 
     if saving == 1:
          plt.savefig(os.path.join(
-              directory,'Overview_all'
+              dir_saving,'Overview_all'
          ), dpi = 300)
 
     return df_fu0m, df_fu3m, df_fu12m
 
-def get_battery_corrs(directory_Feat, directory_TEED, directory_corrs, saving):
+def get_battery_corr_df(directory_Feat, directory_TEED, directory_corrs, saving):
 
 # 1. Get Table with all sums until 12mfu
     all_sums_dfs = pd.DataFrame()
@@ -180,6 +180,16 @@ def get_battery_corrs(directory_Feat, directory_TEED, directory_corrs, saving):
 
     chronic_nonDups = pd.read_csv(os.path.join(directory_corrs, 'Chronic_nonDups_vals.csv'))
     corr_df = pd.merge(corr_df, chronic_nonDups, on='SubID', how='outer')
+
+    if saving == 1:
+            corr_df.to_csv(os.path.join(
+                directory_corrs, 'Corr_df.csv' 
+            ), index = None)
+
+    return corr_df
+    
+    
+def corrs_scatters(corr_df, saving):
 # 4. Make plots
     cols_to_corr = ['Telemetry_AllSec_div', 'TelemDurSumSecRes_div',
         'TelemDurSumSecWard_div', 'SensDurSumSec_div',
@@ -194,19 +204,19 @@ def get_battery_corrs(directory_Feat, directory_TEED, directory_corrs, saving):
     for i, col in enumerate(cols_to_corr):
         x = pd.to_numeric(corr_df[col], errors='coerce')  # Convert to numeric, handle errors by setting them to NaN
         y = pd.to_numeric(corr_df['Battery_12mfu'], errors='coerce')
-
+        
         # Scatter plot
         axs[i].scatter(x, y, label='Data')
-        stat_res = stats.spearmanr(x,y)
+        stat_res = stats.spearmanr(x,y, nan_policy = 'omit')
         correlation_stats[col] = {'R': stat_res.correlation, 'p-value': stat_res.pvalue}
 
-        if col != 'Chronic_12mfu_Days':
+        #if col != 'Chronic_12mfu_Days':
             # Fit a polynomial of degree 1 (linear fit)
-            coeffs = np.polyfit(x, y, 1)
-            line = np.polyval(coeffs, x)
+        coeffs = np.polyfit(x, y, 1)
+        line = np.polyval(coeffs, x)
 
-            # Plot least squares line
-            axs[i].plot(x, line, color='red', label=f'Fit: R={stat_res[0]:.2f}, p={stat_res[1]:.5f}')
+        # Plot least squares line
+        axs[i].plot(x, line, color='red', label=f'Fit: R={stat_res[0]:.2f}, p={stat_res[1]:.5f}')
 
         axs[i].set_title(f'Correlation with {col}')
         axs[i].set_xlabel(col)
@@ -218,11 +228,8 @@ def get_battery_corrs(directory_Feat, directory_TEED, directory_corrs, saving):
     plt.show()
 
 # 5. Conditional Savings
+    
     if saving == 1:
-        corr_df.to_csv(os.path.join(
-            directory_corrs, 'Corr_df.csv' 
-        ), index = None)
-
         plt.savefig(os.path.join(
               directory_corrs, 'Scatters_corrs'
          ), dpi = 300)
@@ -234,4 +241,4 @@ def get_battery_corrs(directory_Feat, directory_TEED, directory_corrs, saving):
                 pickle.dump(correlation_stats, file)
 
 
-    return corr_df, correlation_stats
+    return correlation_stats

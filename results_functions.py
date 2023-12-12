@@ -189,7 +189,7 @@ def get_battery_corr_df(directory_Feat, directory_TEED, directory_corrs, saving)
     return corr_df
     
     
-def corrs_scatters(corr_df, saving):
+def corrs_scatters(corr_df, saving, directory_corrs):
 # 4. Make plots
     cols_to_corr = ['Telemetry_AllSec_div', 'TelemDurSumSecRes_div',
         'TelemDurSumSecWard_div', 'SensDurSumSec_div',

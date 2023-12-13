@@ -95,7 +95,7 @@ def get_descriptives(directory, dir_saving, saving):
     all_dfs = pd.concat([df_fu0m, df_fu3m, df_fu12m])
 
     def assign_electrodes(SubID):
-        if SubID in ['Sub005', 'Sub007', 'Sub011','Sub012','Sub014','Sub015']:
+        if SubID in ['Sub002','Sub005','Sub006', 'Sub007','Sub008', 'Sub011','Sub014','Sub015','Sub020']:
             return '3389'
         else:
             return 'SenSight'
@@ -107,19 +107,38 @@ def get_descriptives(directory, dir_saving, saving):
     all_dfs['SensDurSumMin'] = all_dfs['SensDurSumSec']/60
 
     if saving == 1:
-         all_dfs.to_csv(os.path.join(directory, 'All_FollowUp_dfs.csv'), index= None)
+         all_dfs.to_excel(os.path.join(dir_saving, 'All_FollowUp_dfs.xlsx'), index= False)
 
-
-    fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+    fig, axs = plt.subplots(2, 2, figsize=(8, 8))
     values_of_int = ['Telemetry_AllMin', 'TelemDurSumSMinRes', 'TelemDurSumMinWard', 'SensDurSumMin']
+    
     for i, ax in enumerate(axs.flatten()):
-        sns.boxplot(data=all_dfs, x="TimePoint", y=values_of_int[i], ax=ax)
-        sns.stripplot(data=all_dfs, x="TimePoint", y=values_of_int[i], hue='Electrode', size=8,
-                        jitter=False, ax=ax)
+        sns.boxplot(data=all_dfs, x="TimePoint", y=values_of_int[i], fliersize=0,
+            boxprops=dict(facecolor='tomato', alpha=0.5, edgecolor='grey'),
+            whiskerprops=dict(color='grey'), width = 0.4, dodge = 0.2, ax=ax)
+        
+        # Calculate grouped means
+        grouped_means = all_dfs.groupby(['Electrode', 'TimePoint'])[values_of_int[i]].mean().reset_index()
+
+        # Convert 'TimePoint' to categorical with a specific order
+        timepoint_order = all_dfs['TimePoint'].unique()
+        grouped_means['TimePoint'] = pd.Categorical(grouped_means['TimePoint'], categories=timepoint_order, ordered=True)
+
+        sns.scatterplot(data=grouped_means, x='TimePoint', y=values_of_int[i], hue='Electrode', s=100, marker='o',
+                palette={'3389': 'crimson', 'SenSight': 'royalblue'}, edgecolor='black', ax=ax)
+
         for sub in all_dfs['SubID'].unique():
             part_data = all_dfs[all_dfs['SubID'] == sub]
+            if part_data['Electrode'].unique() == '3389':
+                color = 'crimson'
+            elif part_data['Electrode'].unique() == 'SenSight':
+                color = 'royalblue' 
+            
+            #sns.stripplot(data=all_dfs, x="TimePoint", y=values_of_int[i], hue='Electrode', size=8,
+            #            jitter=False, ax=ax, color = color)
             ax.plot(part_data['TimePoint'], part_data[values_of_int[i]], linestyle=':',
-                    color='grey')
+                    color=color, alpha = 0.4)
+
     plt.show()
 
     if saving == 1:
@@ -127,7 +146,7 @@ def get_descriptives(directory, dir_saving, saving):
               dir_saving,'Overview_all'
          ), dpi = 300)
 
-    return df_fu0m, df_fu3m, df_fu12m
+    return df_fu0m, df_fu3m, df_fu12m, all_dfs
 
 def get_battery_corr_df(directory_Feat, directory_TEED, directory_corrs, saving):
 
@@ -191,11 +210,11 @@ def get_battery_corr_df(directory_Feat, directory_TEED, directory_corrs, saving)
     
 def corrs_scatters(corr_df, saving, directory_corrs):
 # 4. Make plots
-    cols_to_corr = ['Telemetry_AllSec_div', 'TelemDurSumSecRes_div',
-        'TelemDurSumSecWard_div', 'SensDurSumSec_div',
+    cols_to_corr = ['Telemetry_AllSec_div',
+         'SensDurSumSec_div',
         'TEED', 'Chronic_12mfu_Days']
     
-    fig, axs = plt.subplots(2, 3, figsize=(15, 10))  # Adjusted the figure size
+    fig, axs = plt.subplots(2, 2, figsize=(8, 8))  # Adjusted the figure size
 
     correlation_stats = {}
 

@@ -106,17 +106,21 @@ def get_descriptives(directory, dir_saving, saving):
     all_dfs['TelemDurSumMinWard'] = all_dfs['TelemDurSumSecWard']/60
     all_dfs['SensDurSumMin'] = all_dfs['SensDurSumSec']/60
 
-    if saving == 1:
-         all_dfs.to_excel(os.path.join(dir_saving, 'All_FollowUp_dfs.xlsx'), index= False)
+    #if saving == 1:
+    #     all_dfs.to_excel(os.path.join(dir_saving, 'All_FollowUp_dfs.xlsx'), index= False)
 
-    fig, axs = plt.subplots(2, 2, figsize=(8, 8))
-    values_of_int = ['Telemetry_AllMin', 'TelemDurSumSMinRes', 'TelemDurSumMinWard', 'SensDurSumMin']
-    
+    fig, axs = plt.subplots(1, 2, figsize=(11,5))
+    values_of_int = ['Telemetry_AllMin', 'SensDurSumMin']
+    ylabels = ['Total Telemetry Duration [min]','Total Brain Sensing Duration [min]']
+    xlims = [800, 400]
     for i, ax in enumerate(axs.flatten()):
-        sns.boxplot(data=all_dfs, x="TimePoint", y=values_of_int[i], fliersize=0,
+        sns.violinplot(data=all_dfs, x="TimePoint", y=values_of_int[i], hue = 'Electrode', split = True, 
+            gap = 0.1, fliersize=0, native_scale=True, palette = {'3389':'crimson','SenSight':'royalblue'}, 
             boxprops=dict(facecolor='tomato', alpha=0.5, edgecolor='grey'),
-            whiskerprops=dict(color='grey'), width = 0.4, dodge = 0.2, ax=ax)
-        
+            whiskerprops=dict(color='grey'), width = 0.8, dodge = 0.2, ax=ax)
+        ax.set_ylim(-200, xlims[i])
+        ax.set_xlim(-0.5,2.5)
+        ax.set_ylabel(ylabels[i])
         # Calculate grouped means
         grouped_means = all_dfs.groupby(['Electrode', 'TimePoint'])[values_of_int[i]].mean().reset_index()
 
@@ -124,7 +128,7 @@ def get_descriptives(directory, dir_saving, saving):
         timepoint_order = all_dfs['TimePoint'].unique()
         grouped_means['TimePoint'] = pd.Categorical(grouped_means['TimePoint'], categories=timepoint_order, ordered=True)
 
-        sns.scatterplot(data=grouped_means, x='TimePoint', y=values_of_int[i], hue='Electrode', s=100, marker='o',
+        sns.scatterplot(data=grouped_means, x='TimePoint', y=values_of_int[i], hue='Electrode', s=100, marker='D',
                 palette={'3389': 'crimson', 'SenSight': 'royalblue'}, edgecolor='black', ax=ax)
 
         for sub in all_dfs['SubID'].unique():
@@ -136,8 +140,8 @@ def get_descriptives(directory, dir_saving, saving):
             
             #sns.stripplot(data=all_dfs, x="TimePoint", y=values_of_int[i], hue='Electrode', size=8,
             #            jitter=False, ax=ax, color = color)
-            ax.plot(part_data['TimePoint'], part_data[values_of_int[i]], linestyle=':',
-                    color=color, alpha = 0.4)
+            ax.plot(part_data['TimePoint'], part_data[values_of_int[i]], linestyle='-',
+                    linewidth = 0.5, color=color, alpha = 0.4)
 
     plt.show()
 

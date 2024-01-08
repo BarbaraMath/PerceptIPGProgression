@@ -112,10 +112,10 @@ def get_descriptives(directory, dir_saving, saving):
     fig, axs = plt.subplots(1, 2, figsize=(11,5))
     values_of_int = ['Telemetry_AllMin', 'SensDurSumMin']
     ylabels = ['Total Telemetry Duration [min]','Total Brain Sensing Duration [min]']
-    xlims = [800, 400]
+    xlims = [1000, 600]
     for i, ax in enumerate(axs.flatten()):
         sns.violinplot(data=all_dfs, x="TimePoint", y=values_of_int[i], hue = 'Electrode', split = True, 
-            gap = 0.1, fliersize=0, native_scale=True, palette = {'3389':'crimson','SenSight':'royalblue'}, 
+            gap = 0.1, fliersize=0, native_scale=True, palette = {'3389':'lightcoral','SenSight':'lightseagreen'}, 
             boxprops=dict(facecolor='tomato', alpha=0.5, edgecolor='grey'),
             whiskerprops=dict(color='grey'), width = 0.8, dodge = 0.2, ax=ax)
         ax.set_ylim(-200, xlims[i])
@@ -129,14 +129,14 @@ def get_descriptives(directory, dir_saving, saving):
         grouped_means['TimePoint'] = pd.Categorical(grouped_means['TimePoint'], categories=timepoint_order, ordered=True)
 
         sns.scatterplot(data=grouped_means, x='TimePoint', y=values_of_int[i], hue='Electrode', s=100, marker='D',
-                palette={'3389': 'crimson', 'SenSight': 'royalblue'}, edgecolor='black', ax=ax)
+                palette={'3389': 'lightcoral', 'SenSight': 'lightseagreen'}, edgecolor='black', ax=ax)
 
         for sub in all_dfs['SubID'].unique():
             part_data = all_dfs[all_dfs['SubID'] == sub]
             if part_data['Electrode'].unique() == '3389':
-                color = 'crimson'
+                color = 'lightcoral'
             elif part_data['Electrode'].unique() == 'SenSight':
-                color = 'royalblue' 
+                color = 'lightseagreen' 
             
             #sns.stripplot(data=all_dfs, x="TimePoint", y=values_of_int[i], hue='Electrode', size=8,
             #            jitter=False, ax=ax, color = color)
@@ -146,9 +146,13 @@ def get_descriptives(directory, dir_saving, saving):
     plt.show()
 
     if saving == 1:
-         plt.savefig(os.path.join(
+        plt.savefig(os.path.join(
               dir_saving,'Overview_all'
          ), dpi = 300)
+         
+        plt.savefig(os.path.join(
+              dir_saving,'Overview_all.pdf'
+         ))
 
     return df_fu0m, df_fu3m, df_fu12m, all_dfs
 

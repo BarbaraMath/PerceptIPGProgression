@@ -103,22 +103,22 @@ def get_descriptives(directory, dir_saving, saving):
     all_dfs['Electrode'] = all_dfs['SubID'].apply(assign_electrodes)
     all_dfs['Telemetry_AllMin'] = all_dfs['Telemetry_AllSec']/60
     all_dfs['TelemDurSumSMinRes'] = all_dfs['TelemDurSumSecRes']/60
-    all_dfs['TelemDurSumMinWard'] = all_dfs['TelemDurSumSecWard']/60
+    all_dfs['TelemDurSumMinProgram'] = all_dfs['TelemDurSumSecProgramming']/60
     all_dfs['SensDurSumMin'] = all_dfs['SensDurSumSec']/60
 
-    #if saving == 1:
-    #     all_dfs.to_excel(os.path.join(dir_saving, 'All_FollowUp_dfs.xlsx'), index= False)
+    if saving == 1:
+         all_dfs.to_excel(os.path.join(dir_saving, 'All_FollowUp_dfs.xlsx'), index= False)
 
-    fig, axs = plt.subplots(1, 2, figsize=(11,5))
-    values_of_int = ['Telemetry_AllMin', 'SensDurSumMin']
-    ylabels = ['Total Telemetry Duration [min]','Total Brain Sensing Duration [min]']
-    xlims = [1000, 600]
+    fig, axs = plt.subplots(1, 3, figsize=(18,5))
+    values_of_int = ['Telemetry_AllMin', 'TelemDurSumMinProgram', 'SensDurSumMin']
+    ylabels = ['Total Telemetry Duration [min]','Programming Telemetry Duration [min]','Total Brain Sensing Duration [min]']
+    ylims = [1000, 500, 600]
     for i, ax in enumerate(axs.flatten()):
         sns.violinplot(data=all_dfs, x="TimePoint", y=values_of_int[i], hue = 'Electrode', split = True, 
             gap = 0.1, fliersize=0, native_scale=True, palette = {'3389':'lightcoral','SenSight':'lightseagreen'}, 
             boxprops=dict(facecolor='tomato', alpha=0.5, edgecolor='grey'),
             whiskerprops=dict(color='grey'), width = 0.8, dodge = 0.2, ax=ax)
-        ax.set_ylim(-200, xlims[i])
+        ax.set_ylim(-200, ylims[i])
         ax.set_xlim(-0.5,2.5)
         ax.set_ylabel(ylabels[i])
         # Calculate grouped means
@@ -200,7 +200,7 @@ def get_battery_corr_df(directory_Feat, directory_TEED, directory_corrs, saving)
 
     corr_df = all_sums_dfs.merge(all_teeds_dfs, on = 'SubID')
     columns_to_divide = ['Telemetry_AllSec', 'TelemDurSumSecRes', 
-                         'TelemDurSumSecWard', 'SensDurSumSec']
+                         'TelemDurSumSecProgramming', 'SensDurSumSec']
 
     for column in columns_to_divide:
         corr_df[f'{column}_div'] = corr_df[column] / 60
@@ -218,11 +218,11 @@ def get_battery_corr_df(directory_Feat, directory_TEED, directory_corrs, saving)
     
 def corrs_scatters(corr_df, saving, directory_corrs):
 # 4. Make plots
-    cols_to_corr = ['Telemetry_AllSec_div',
+    cols_to_corr = ['Telemetry_AllSec_div', 'TelemDurSumSecProgramming_div', 
          'SensDurSumSec_div',
         'TEED', 'Chronic_12mfu_Days']
     
-    fig, axs = plt.subplots(2, 2, figsize=(8, 8))  # Adjusted the figure size
+    fig, axs = plt.subplots(2, 3, figsize=(10,8))  # Adjusted the figure size
 
     correlation_stats = {}
 

@@ -212,6 +212,10 @@ def get_battery_corr_df(directory_Feat, directory_TEED, directory_corrs, saving)
             corr_df.to_csv(os.path.join(
                 directory_corrs, 'Corr_df.csv' 
             ), index = None)
+            
+            corr_df.to_excel(os.path.join(
+                directory_corrs, 'Corr_df.xlsx' 
+            ), index = None)
 
     return corr_df
     

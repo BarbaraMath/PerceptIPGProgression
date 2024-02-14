@@ -129,7 +129,7 @@ def extract_MetaTable(json_path_Subject, json_path, subID, filtered_files):
         'SubID': subID,
         'json_fileName': json_fileName,
         'Con_Reason': os.path.basename(json_path_Subject),
-        'FollowUp': 'TagesKlinik', 
+        #'FollowUp': 'TagesKlinik', 
         'ImplantDate': ImplantDate,
         'SessionDate': SessionDate,
         'SessionEndDate': SessionEndDate,

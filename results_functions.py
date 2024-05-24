@@ -166,6 +166,9 @@ def get_battery_corr_df(directory_Feat, directory_TEED, directory_corrs, saving)
             file_path = os.path.join(directory_Feat, filename)
             df = pd.read_csv(file_path, index_col=None)
             df = df.drop('Unnamed: 0', axis = 1)
+            
+            df = df[df['TimePoint'] != 'Beelitz']
+            df.reset_index(drop=True, inplace=True)
 
             Sub_id = filename[0:6]
 
@@ -207,14 +210,15 @@ def get_battery_corr_df(directory_Feat, directory_TEED, directory_corrs, saving)
 
     chronic_nonDups = pd.read_csv(os.path.join(directory_corrs, 'Chronic_nonDups_vals.csv'))
     corr_df = pd.merge(corr_df, chronic_nonDups, on='SubID', how='outer')
+    corr_df = corr_df.sort_values(by='SubID')
 
     if saving == 1:
             corr_df.to_csv(os.path.join(
-                directory_corrs, 'Corr_df.csv' 
+                directory_corrs, 'Corr_df_NOBEEL.csv' 
             ), index = None)
             
             corr_df.to_excel(os.path.join(
-                directory_corrs, 'Corr_df.xlsx' 
+                directory_corrs, 'Corr_df_NOBEEL.xlsx' 
             ), index = None)
 
     return corr_df
@@ -226,7 +230,7 @@ def corrs_scatters(corr_df, saving, directory_corrs):
          'SensDurSumSec_div',
         'TEED', 'Chronic_12mfu_Days']
     
-    fig, axs = plt.subplots(2, 3, figsize=(10,8))  # Adjusted the figure size
+    fig, axs = plt.subplots(2, 3, figsize=(12,10))  # Adjusted the figure size
 
     correlation_stats = {}
 

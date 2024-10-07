@@ -342,8 +342,14 @@ def extract_chronic_nonDups(SubID, directory_of_all):
     for item in os.listdir(directory_of_all): #find all files in each patient directory in S drive
         item_path = os.path.join(directory_of_all, item) #define the directory e.g. the folder 'Beelitz'
         
-        if os.path.isdir(item_path): #if this is a folder
-            all_json_files = glob.glob(os.path.join(item_path, '*.json')) #find all json files within the folder
+        if os.path.isdir(item_path) and item == 'Beelitz':
+            print(f"Ignoring folder: {item}")
+            continue 
+        
+        if os.path.isdir(item_path):
+            print(f"Processing folder: {item}")  # Debug: print when processing other folders
+            all_json_files = glob.glob(os.path.join(item_path, '*.json'))  # Find all JSON files in the folder
+            
             
             for file in all_json_files: #loop through each json file
                 with open(file) as file: #and load it
